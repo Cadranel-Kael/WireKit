@@ -1,0 +1,55 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "cadranel-kael/livewire-ui-kit",
+    "description": "A custom set of Blade components for Livewire & AlpineJS.",
+    "keywords": [
+        "Livewire",
+        "Laravel",
+        "UI"
+    ],
+    "homepage": "",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kael Cadranel",
+            "homepage": "kael.digital"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/filesystem": "^10.0|^11.0|^12.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/view": "^10.0|^11.0|^12.0",
+        "nesbot/carbon": "^2.38|^3.0"
+    },
+    "require-dev": {
+        "livewire/livewire": "^3.0",
+        "pestphp/pest": "^3.7",
+        "pestphp/pest-plugin-laravel": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "LivewireUIKit\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LivewireUIKit\\LivewireUIKitServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
