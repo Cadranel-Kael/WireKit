@@ -1,0 +1,19 @@
+@import '../../../../../resources/css/app.css';
+
+.btn {
+    @apply text-base-100 w-full gap-2 bg-base-content px-4 rounded py-2 inline-flex justify-center items-center h-8 hover:bg-base-content/90 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium transition-colors  cursor-pointer
+}
+
+.btn-primary {
+    @apply bg-primary text-primary-content hover:bg-primary/90;
+}
+
+@position-try --bottom {
+    inset: auto;
+    bottom: anchor(bottom);
+    right: anchor(left);
+}
+
+input::placeholder {
+    @apply text-base-content/50 font-medium;
+}
