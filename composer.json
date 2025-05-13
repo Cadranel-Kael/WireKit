@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "cadranel-kael/livewire-ui-kit",
+    "name": "cadranel-kael/wire-kit",
     "description": "A custom set of Blade components for Livewire & AlpineJS.",
     "keywords": [
         "Livewire",
@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "LivewireUIKit\\": "src"
+            "WireKit\\": "src"
         }
     },
     "autoload-dev": {
@@ -41,7 +41,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "LivewireUIKit\\LivewireUIKitServiceProvider"
+              "WireKit\\WireKitServiceProvider"
             ]
         }
     },

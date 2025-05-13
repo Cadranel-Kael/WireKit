@@ -1,6 +1,6 @@
 <?php
 
-namespace LivewireUIKit\View\Components;
+namespace WireKit\View\Components;
 
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
@@ -10,18 +10,16 @@ use Str;
 class Table extends Component
 {
     public function __construct(
-        public array            $headers = [],
+        public array $headers = [],
         public Collection|array $rows = [],
-        public                  $sortBy = [],
-        public bool             $selectable = false,
-        public string           $link = '',
-    )
-    {
-    }
+        public $sortBy = [],
+        public bool $selectable = false,
+        public string $link = '',
+    ) {}
 
     public function getClass(mixed $header): string
     {
-        if (key_exists('class', $header)) {
+        if (array_key_exists('class', $header)) {
             return $header['class'];
         }
 
@@ -54,7 +52,7 @@ class Table extends Component
             $format = $header['format'][1] ?? '0.,';
 
             if (preg_match('/(\d)([.,]?)([.,]?)/', $format, $matches)) {
-                $decimals = (int)$matches[1];
+                $decimals = (int) $matches[1];
                 $decimalSeparator = $matches[2] !== '' ? $matches[2] : '.';
                 $thousandsSeparator = $matches[3] !== '' ? $matches[3] : ',';
             }
@@ -69,7 +67,7 @@ class Table extends Component
     {
         return collect($this->rows)
             ->pluck('id')
-            ->map(fn($id) => (string)$id)
+            ->map(fn ($id) => (string) $id)
             ->toArray();
     }
 
@@ -83,7 +81,7 @@ class Table extends Component
             $tokens = Str::of($link)->matchAll('/\{(.*?)\}/');
 
             $tokens->each(function (string $token) use ($row, &$link) {
-                $link = Str::of($link)->replace("{" . $token . "}", data_get($row, $token))->toString();
+                $link = Str::of($link)->replace('{'.$token.'}', data_get($row, $token))->toString();
             });
 
             return $link;

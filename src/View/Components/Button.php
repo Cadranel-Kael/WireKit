@@ -1,6 +1,6 @@
 <?php
 
-namespace LivewireUIKit\View\Components;
+namespace WireKit\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
