@@ -6,6 +6,7 @@
     @if ($transition)
         x-collapse
     @endif
+    role="region"
     :aria-expanded="show ? 'true' : 'false'"
     id="{{ $contentId }}"
     aria-labelledby="{{ $headingId }}"
