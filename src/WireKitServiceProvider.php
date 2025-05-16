@@ -27,7 +27,6 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('search', View\Components\Search::class);
 //        Blade::component('tabs', View\Components\Tabs::class);
 //        Blade::component('tab', View\Components\Tab::class);
-        Blade::component('alert', View\Components\Alert::class);
         Blade::component('table', View\Components\Table::class);
         Blade::component('icon', View\Components\Icon::class);
         Blade::component('input', View\Components\Input::class);
@@ -49,5 +48,8 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('accordion.heading', View\Components\Accordion\Heading::class);
         Blade::component('accordion.content', View\Components\Accordion\Content::class);
 
+        Blade::component('alert', View\Components\Alert\Index::class);
+        Blade::component('alert.heading', View\Components\Alert\Heading::class);
+        Blade::component('alert.description', View\Components\Alert\Description::class);
     }
 }

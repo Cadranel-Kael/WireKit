@@ -1,21 +1,21 @@
 <?php
 
-namespace WireKit\View\Components;
+namespace WireKit\View\Components\Alert;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-class Alert extends Component
+class Index extends Component
 {
     public function __construct(
         public string $variant = '',
-        public string $message = '',
-        public bool $dismissible = false,
-        public string $title = '',
         public string $icon = '',
-    )
-    {
-    }
+        public string $controls = '',
+        public string $actions = '',
+        public bool $inline = false,
+        public string $heading = '',
+        public string $description = '',
+    ) {}
 
     public function variantClass(): string
     {
@@ -34,6 +34,6 @@ class Alert extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.alert');
+        return view('livewire-ui-kit::components.alert.index');
     }
 }
