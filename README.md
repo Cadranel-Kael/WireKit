@@ -14,7 +14,7 @@ as needed.
 
 ### Tags
 
-#### Index
+#### Accordion
 
 `<x-accordion />`
 
@@ -91,3 +91,75 @@ The content of the accordion that conditionally is shown or hidden.
 </x-accordion>
 ```
 
+## Alert
+
+An Alert — also referred to as a Callout — is a UI component used to draw attention to important information, status
+messages, or contextual feedback. Alerts are typically color-coded to represent different levels of importance or types
+of messages.
+
+### Tags
+
+#### Index
+
+`<x-alert />`
+
+The tag that holds the content of alert
+
+| Prop          | Type     | Default | Description                                                                                                                                            |
+|---------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `variant`     | `string` | `''`    | Controls the visual style of the alert. Supported values include: `primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, and `dark`. |
+| `icon`        | `string` | `''`    | Optional name of an icon (e.g., from a Heroicons or Lucide set) to visually represent the alert’s purpose.                                             |
+| `controls`    | `string` | `''`    | A string of Blade markup or HTML for extra controls (e.g., close button, toggle, dropdown).                                                            |
+| `actions`     | `string` | `''`    | A string of Blade markup or HTML for action buttons (e.g., "Undo", "Retry").                                                                           |
+| `inline`      | `bool`   | `false` | When set to `true`, the alert is rendered as an **inline element**, allowing it to sit within content flow rather than a block.                        |
+| `heading`     | `string` | `''`    | A title or header for the alert, shown prominently.                                                                                                    |
+| `description` | `string` | `''`    | A longer body of text providing more context or detail for the alert message.                                                                          |
+
+#### Heading
+
+#### Description
+
+## Badge
+
+A badge
+
+### Tags
+
+#### Badge
+
+`<x-badge />`
+
+| Prop           | Description                                                                                 |
+|----------------|---------------------------------------------------------------------------------------------|
+| `color`        | The color of the badge, uses tailwinds colors (e.g. `red`, `lime`). By default uses `zinc`. |
+| `colorVariant` | The style of colors used. Options: `solid`.                                                 |
+| `size`         | The size of the badge. Options: `small`, `large`.                                           |
+| `variant`      | The variant style of badge used. Options: `pill`.                                           |
+| `icon`         | The left icon of the badge.                                                                 |
+| `icon-right`   | The right icon of the badge.                                                                |
+| `as`           | The tag surrounding the badge. Options: `button`. Default: `div`.                           |
+
+#### Close
+
+`<x-badge />`
+
+The button used to close the element
+
+### Examples
+
+```html
+<x-badge>Badge</x-badge>
+```
+
+```html
+<x-badge as="button" color="red">
+    Badge
+</x-badge>
+```
+
+```html
+<x-badge>
+    Badge
+    <x-badge.close/>
+</x-badge>
+```
