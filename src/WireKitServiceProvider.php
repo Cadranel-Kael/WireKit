@@ -19,7 +19,6 @@ class WireKitServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'livewire-ui-kit');
 
-        Blade::component('badge', View\Components\Badge::class);
         Blade::component('sidebar', View\Components\Sidebar::class);
         Blade::component('button', View\Components\Button::class);
         Blade::component('menu-item', View\Components\MenuItem::class);
@@ -51,5 +50,8 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('alert', View\Components\Alert\Index::class);
         Blade::component('alert.heading', View\Components\Alert\Heading::class);
         Blade::component('alert.description', View\Components\Alert\Description::class);
+
+        Blade::component('badge', View\Components\Badge\Index::class);
+        Blade::component('badge.close', View\Components\Badge\Close::class);
     }
 }
