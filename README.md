@@ -3,8 +3,7 @@
 ## Table of contents
 
 - [Accordion](#accordion)
-
----
+- [Badge](#badge)
 
 ## Accordion
 
