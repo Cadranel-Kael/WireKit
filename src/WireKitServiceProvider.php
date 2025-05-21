@@ -17,6 +17,8 @@ class WireKitServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        include_once(__DIR__.'/helpers.php');
+
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'livewire-ui-kit');
 
         Blade::component('sidebar', View\Components\Sidebar::class);

@@ -3,7 +3,7 @@
     {{
         $attributes->class([
             'border-base-200 flex w-full max-w-md items-start gap-4 rounded border px-4 py-3 text-sm',
-            $variantClass,
+            $colorClass,
         ])
     }}
 >

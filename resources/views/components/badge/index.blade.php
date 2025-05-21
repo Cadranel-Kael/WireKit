@@ -4,7 +4,7 @@
             $attributes
                 ->class([
                     'flex w-fit items-center gap-1 font-medium',
-                    $colorClass(),
+                    $colorClass,
                     $sizeClass(),
                     $variantClass(),
                 ])
@@ -26,9 +26,8 @@
         {{
             $attributes->class([
                 'flex w-fit items-center gap-1 font-medium',
-                $colorClass(),
+                $colorClass,
                 $sizeClass(),
-                $variantClass(),
             ])
         }}
     >
