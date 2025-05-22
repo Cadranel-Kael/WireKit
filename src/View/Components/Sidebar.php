@@ -15,6 +15,6 @@ class Sidebar extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.sidebar');
+        return view('wire-kit::components.sidebar');
     }
 }

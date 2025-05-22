@@ -14,6 +14,6 @@ class Rows extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.table.rows');
+        return view('wire-kit::components.table.rows');
     }
 }

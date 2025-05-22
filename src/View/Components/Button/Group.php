@@ -13,6 +13,6 @@ class Group extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.button.group');
+        return view('wire-kit::components.button.group');
     }
 }

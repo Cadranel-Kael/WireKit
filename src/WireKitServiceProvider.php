@@ -2,6 +2,7 @@
 
 namespace WireKit;
 
+
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +20,7 @@ class WireKitServiceProvider extends ServiceProvider
     {
         include_once(__DIR__.'/helpers.php');
 
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'livewire-ui-kit');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'wire-kit');
 
         Blade::component('sidebar', View\Components\Sidebar::class);
         Blade::component('menu-item', View\Components\MenuItem::class);
@@ -50,6 +51,8 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('alert', View\Components\Alert\Index::class);
         Blade::component('alert.heading', View\Components\Alert\Heading::class);
         Blade::component('alert.description', View\Components\Alert\Description::class);
+
+        Blade::component('avatar', View\Components\Avatar\Index::class);
 
         Blade::component('badge', View\Components\Badge\Index::class);
         Blade::component('badge.close', View\Components\Badge\Close::class);

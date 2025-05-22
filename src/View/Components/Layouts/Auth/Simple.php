@@ -9,6 +9,6 @@ class Simple extends Component
 {
     public function render(): View
     {
-        return view('livewire-ui-kit::components.layouts.auth.simple');
+        return view('wire-kit::components.layouts.auth.simple');
     }
 }

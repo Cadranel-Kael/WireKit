@@ -16,6 +16,6 @@ class MenuItem extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.menu-item');
+        return view('wire-kit::components.menu-item');
     }
 }

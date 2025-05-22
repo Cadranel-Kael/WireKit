@@ -12,6 +12,6 @@ class Close extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.badge.close');
+        return view('wire-kit::components.badge.close');
     }
 }

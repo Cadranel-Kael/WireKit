@@ -12,6 +12,6 @@ class Description extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.alert.description');
+        return view('wire-kit::components.alert.description');
     }
 }

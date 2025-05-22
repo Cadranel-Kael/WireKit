@@ -14,6 +14,6 @@ class Index extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.table.index');
+        return view('wire-kit::components.table.index');
     }
 }

@@ -14,6 +14,6 @@ class Columns extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.table.columns');
+        return view('wire-kit::components.table.columns');
     }
 }

@@ -21,6 +21,6 @@ class Item extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.accordion.item');
+        return view('wire-kit::components.accordion.item');
     }
 }

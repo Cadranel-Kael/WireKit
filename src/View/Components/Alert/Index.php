@@ -37,6 +37,6 @@ class Index extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.alert.index');
+        return view('wire-kitt::components.alert.index');
     }
 }

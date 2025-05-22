@@ -13,6 +13,6 @@ class Heading extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.alert.heading');
+        return view('wire-kit::components.alert.heading');
     }
 }

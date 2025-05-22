@@ -12,6 +12,6 @@ class Content extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.accordion.content');
+        return view('wire-kit::components.accordion.content');
     }
 }

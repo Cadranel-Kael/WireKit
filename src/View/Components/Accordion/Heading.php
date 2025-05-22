@@ -12,6 +12,6 @@ class Heading extends Component
 
     public function render(): View
     {
-        return view('livewire-ui-kit::components.accordion.heading');
+        return view('wire-kit::components.accordion.heading');
     }
 }
