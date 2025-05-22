@@ -28,6 +28,7 @@
                 'flex w-fit items-center gap-1 font-medium',
                 $colorClass,
                 $sizeClass(),
+                $variantClass(),
             ])
         }}
     >

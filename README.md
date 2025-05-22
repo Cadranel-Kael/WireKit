@@ -147,18 +147,62 @@ The button used to close the element
 ### Examples
 
 ```html
+
 <x-badge>Badge</x-badge>
 ```
 
 ```html
+
 <x-badge as="button" color="red">
     Badge
 </x-badge>
 ```
 
 ```html
+
 <x-badge>
     Badge
-    <x-badge.close/>
+    <x-badge.close />
 </x-badge>
+```
+
+## Button
+
+A button
+
+### Tags
+
+#### Button
+
+`<x-button />`
+
+| Prop         | Description                                                                   |
+|--------------|-------------------------------------------------------------------------------|
+| `link`       | Href of the button. This turns the `button` tag into a `a` tag.               |
+| `label`      | Shorthand for the slot.                                                       |
+| `size`       | The size of the button. Options: `sm`, `xs`.                                  |
+| `variant`    | The variant style of button. Options: `primary`, `filled`, `danger`, `ghost`. |
+| `icon`       | The left icon of the button.                                                  |
+| `icon-right` | The right icon of the button.                                                 |
+| `square`     | Option for icon buttons to have the same height and width.                    |
+
+#### Button Group
+
+`<x-button.group />`
+
+A tag to 'attach' multiple button together
+
+### Examples
+
+```html
+
+<x-button>Click me</x-button>
+```
+
+```html
+
+<x-button.group>
+    <x-button>Button</x-button>
+    <x-button icon="o-ellipsis-horizontal" />
+</x-button.group>
 ```

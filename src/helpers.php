@@ -114,6 +114,11 @@ if (! function_exists('getColorClass')) {
                 'border' => 'text-stone-800 bg-stone-200 border border-stone-800'.($context === 'button' ? ' hover:bg-stone-300' : ''),
                 default => 'text-stone-800 bg-stone-200'.($context === 'button' ? ' hover:bg-stone-300' : ''),
             },
+            'core' => match ($variant) {
+                'solid' => 'text-white bg-core-500'.($context === 'button' ? ' hover:bg-core-400' : ''),
+                'border' => 'text-core-800 bg-core-200 border border-core-800'.($context === 'button' ? ' hover:bg-core-300' : ''),
+                default => 'text-core-800 bg-core-200'.($context === 'button' ? ' hover:bg-core-300' : ''),
+            },
             default => match ($variant) {
                 'solid' => "text-white bg-{$color}-500".($context === 'button' ? " hover:bg-{$color}-400" : ''),
                 'border' => "text-{$color}-800 bg-{$color}-200 border border-{$color}-800".($context === 'button' ? " hover:bg-{$color}-300" : ''),
