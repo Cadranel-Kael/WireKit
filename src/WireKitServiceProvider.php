@@ -2,7 +2,6 @@
 
 namespace WireKit;
 
-
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,7 +40,6 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('field', View\Components\Field::class);
         Blade::component('fieldset', View\Components\Fieldset::class);
         Blade::component('legend', View\Components\Legend::class);
-        Blade::component('tooltip', View\Components\Tooltip::class);
 
         Blade::component('accordion', View\Components\Accordion\Index::class);
         Blade::component('accordion.item', View\Components\Accordion\Item::class);
@@ -60,11 +58,16 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('button', View\Components\Button\Index::class);
         Blade::component('button.group', View\Components\Button\Group::class);
 
+        Blade::component('breadcrumbs', View\Components\Breadcrumbs\Index::class);
+        Blade::component('breadcrumbs.item', View\Components\Breadcrumbs\Item::class);
+
         Blade::component('table', View\Components\Table\Index::class);
         Blade::component('table.columns', View\Components\Table\Columns::class);
         Blade::component('table.column', View\Components\Table\Column::class);
         Blade::component('table.rows', View\Components\Table\Rows::class);
         Blade::component('table.row', View\Components\Table\Row::class);
         Blade::component('table.cell', View\Components\Table\Cell::class);
+
+        Blade::component('tooltip', View\Components\Tooltip\Index::class);
     }
 }

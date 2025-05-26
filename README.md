@@ -4,6 +4,7 @@
 
 - [Accordion](#accordion)
 - [Badge](#badge)
+- [Breadcrumbs](#breadcrumbs)
 
 ## Accordion
 
@@ -69,7 +70,7 @@ The content of the accordion that conditionally is shown or hidden.
             Yes!
             By default, the accordion allows multiple items to be open simultaneously. However, you can enable the
             exclusive mode to ensure only one item remains open at a time, which mimics traditional accordion behavior.
-        </x-accordion.content
+        </x-accordion.content>
     </x-accordion.item>
     <x-accordion.item heading="What happens if an accordion item is disabled?">
         If an item is marked as disabled, it cannot be opened or closed through user interaction. This is useful when
@@ -206,3 +207,28 @@ A tag to 'attach' multiple button together
     <x-button icon="o-ellipsis-horizontal" />
 </x-button.group>
 ```
+
+## Breadcrumbs
+
+Breadcrumbs are trails of the parents of the current page. This helps inform the user to understand where they are in
+the
+current page.
+
+### Tags
+
+#### Breadcrumbs
+
+`<x-breadcrumbs>`
+
+Groups the 'crumbs' (links) of the breadcrumbs.
+
+#### Breadcrumbs item
+
+`<x-breadcrumbs.item>`
+
+| Prop           | Description                                                        |
+|----------------|--------------------------------------------------------------------|
+| `href`         | Href of the crumb.                                                 |
+| `separator`    | The logo used to separate the items. Default: 'chevron-right'.     |
+| `icon`         | The icon used at the place of text.                                |
+| `icon-variant` | The variant of icon. Options: `outline`, `solid`, `mini`, `micro`. |
