@@ -61,6 +61,16 @@ class WireKitServiceProvider extends ServiceProvider
         Blade::component('breadcrumbs', View\Components\Breadcrumbs\Index::class);
         Blade::component('breadcrumbs.item', View\Components\Breadcrumbs\Item::class);
 
+        Blade::component('context', View\Components\Context::class);
+
+        Blade::component('dropdown', View\Components\Dropdown\Index::class);
+        Blade::component('dropdown.button', View\Components\Dropdown\Button::class);
+        Blade::component('dropdown.menu', View\Components\Dropdown\Menu::class);
+        Blade::component('dropdown.item', View\Components\Dropdown\Item::class);
+
+        Blade::component('menu', View\Components\Menu\Index::class);
+        Blade::component('menu.item', View\Components\Menu\Item::class);
+
         Blade::component('table', View\Components\Table\Index::class);
         Blade::component('table.columns', View\Components\Table\Columns::class);
         Blade::component('table.column', View\Components\Table\Column::class);
