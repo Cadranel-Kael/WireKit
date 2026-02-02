@@ -8,25 +8,19 @@
             class="hover:underline hover:underline-offset-3"
         >
             @if ($icon)
-                <x-icon
-                    class="hover:text-gray-500"
-                    name="{{ $icon }}"
-                />
+                <wire:icon class="hover:text-gray-500" name="{{ $icon }}" variant="{{ $iconVariant }}" />
             @else
                 {{ $slot }}
             @endif
         </a>
     @else
         @if ($icon)
-            <x-icon name="{{ $icon }}" />
+            <wire:icon name="{{ $icon }}" />
         @else
             <div>
                 {{ $slot }}
             </div>
         @endif
     @endif
-    <x-icon
-        class="text-gray-300 group-last:hidden"
-        name="m-{{ $separator }}"
-    />
+    <wire:icon class="text-gray-300 group-last:hidden" name="{{ $separator }}" variant="micro" />
 </li>
