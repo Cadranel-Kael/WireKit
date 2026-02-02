@@ -1,8 +1,16 @@
+@aware(['groupId', 'transition'])
 <div
-    class="flex flex-col gap-4"
-    @if ($exclusive)
-        x-init="$store.accordion = { openItem: null, counter: 0 }"
-    @endif
+    data-wire-accordion
+    data-wire-expanded="@js($expanded)"
+    data-disabled="@js($disabled)"
+    data-wire-group="{{ $groupId }}"
+    data-wire-transition="@js($transition)";
+    {{ $attributes->class('border-border flex max-w-sm flex-col pb-2 not-last:border-b') }}
 >
-    {{ $slot }}
+    @if ($heading)
+        <wire:accordion.heading :class="$attributes->get('heading:class', '')">{{ $heading }}</wire:accordion.heading>
+        <wire:accordion.content :class="$attributes->get('content:class', '')">{{ $slot }}</wire:accordion.content>
+    @else
+        {{ $slot }}
+    @endif
 </div>

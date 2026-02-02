@@ -1,15 +1,9 @@
-@aware(["headingId", "contentId", "transition"])
+@aware(['headingId', 'contentId'])
 <div
-    {{ $attributes->class("text-base-content/80 text-sm font-normal") }}
-    x-show="show"
-    x-cloak
-    @if ($transition)
-        x-collapse
-    @endif
-    role="region"
-    :aria-expanded="show ? 'true' : 'false'"
+    data-wire-accordion-content
+    {{ $attributes->class('text-base-content text-sm font-normal')->merge(['role' => 'region']) }}
     id="{{ $contentId }}"
     aria-labelledby="{{ $headingId }}"
->
+    >
     {{ $slot }}
 </div>

@@ -1,19 +1,18 @@
-@aware(["headingId", "contentId", "disabled", "inclusive"])
+@aware(["headingId", "contentId", "disabled"])
 <button
+    data-wire-accordion-heading
     type="button"
-    {{ $attributes->class(["group flex w-full cursor-pointer items-center justify-between pb-2 text-sm font-medium", "text-base-content/50" => $disabled]) }}
-    @if (! $disabled)
-        @click="toggle"
-    @else
+    {{ $attributes->class("group flex w-full items-center justify-between pb-2 text-sm font-medium disabled:opacity-50") }}
+    @if ($disabled)
         disabled
     @endif
     id="{{ $headingId }}"
     aria-controls="{{ $contentId }}"
 >
     <div>{{ $slot }}</div>
-    <x-icon
-        x-bind:class="show ? '-rotate-180' : 'text-base-content/50'"
-        name="c-chevron-up"
-        @class(["transition-colors !w-5 !h-5", "group-hover:text-base-content" => ! $disabled])
+    <wire:icon
+        name="chevron-down"
+        variant="micro"
+        @class(["text-muted-foreground !h-5 !w-5 transition-colors group-aria-expanded:rotate-180", "group-hover:text-inherit" => ! $disabled])
     />
 </button>
