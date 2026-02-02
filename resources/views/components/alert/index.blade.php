@@ -1,38 +1,45 @@
 <div
+    data-wire-alert
     role="alert"
     {{
         $attributes->class([
-            'border-base-200 flex w-full max-w-md items-start gap-4 rounded border px-4 py-3 text-sm',
+            'border-core-200 flex w-full max-w-md gap-4 rounded-xl border px-4 py-3 text-sm',
+            'items-start' => ! $inline,
+            'items-center' => $inline,
             $colorClass,
         ])
     }}
 >
     @if ($icon)
-        <x-icon
+        <wire:icon
             :name="$icon"
-            class="shrink-0"
+            :variant="$attributes->get('icon:variant', '')"
+            :size="$attributes->get('icon:size', '')"
+            @class(['text-core-400 mt-0.5 shrink-0', $attributes->get('icon:class', '')])
         />
     @endif
 
     <div class="flex flex-col gap-2">
         @if ($heading)
-            <x-alert.heading>{{ $heading }}</x-alert.heading>
+            <wire:alert.heading :class="$attributes->get('heading:class', '')">{{ $heading }}</wire:alert.heading>
         @endif
 
         @if ($description)
-            <x-alert.description>{{ $description }}</x-alert.description>
+            <wire:alert.description :class="$attributes->get('description:class', '')">
+                {{ $description }}
+            </wire:alert.description>
         @endif
 
         {{ $slot }}
 
-        @if (! $inline)
-            <div class="mt-1 flex gap-4">
+        @if (! $inline && $actions)
+            <div @class(['mt-1 flex gap-4', $attributes->get('actions:class', '')])>
                 {{ $actions }}
             </div>
         @endif
     </div>
-    @if ($inline)
-        <div class="flex shrink-0 gap-4">
+    @if ($inline && $actions)
+        <div @class(['flex shrink-0 gap-4', $attributes->get('actions:class', '')])>
             {{ $actions }}
         </div>
     @endif

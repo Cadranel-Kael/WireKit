@@ -7,8 +7,9 @@ use Illuminate\View\View;
 
 class Description extends Component
 {
-    public function __construct(
-    ) {}
+    public function __construct()
+    {
+    }
 
     public function render(): View
     {
