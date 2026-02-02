@@ -1,0 +1,27 @@
+{
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.1.6",
+        "axios": "^1.9.0",
+        "concurrently": "^9.1.2",
+        "laravel-vite-plugin": "^1.2.0",
+        "pint": "^0.2.1",
+        "prettier": "^3.5.3",
+        "prettier-plugin-blade": "^2.1.21",
+        "prettier-plugin-tailwindcss": "^0.6.11",
+        "shiki": "^3.6.0",
+        "tailwindcss": "^4.1.6",
+        "vite": "^6.3.5"
+    },
+    "dependencies": {
+        "@alpinejs/anchor": "^3.14.9",
+        "@alpinejs/collapse": "^3.14.9",
+        "@alpinejs/focus": "^3.14.9",
+        "@alpinejs/intersect": "^3.14.9",
+        "@ryangjchandler/alpine-clipboard": "^2.3.0",
+        "@ryangjchandler/alpine-tooltip": "^2.0.1",
+        "alpinejs": "^3.14.9",
+        "tippy.js": "^6.3.7"
+    }
+}

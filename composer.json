@@ -7,12 +7,12 @@
         "Laravel",
         "UI"
     ],
-    "homepage": "",
+    "homepage": "https://kael.digital",
     "license": "MIT",
     "authors": [
         {
             "name": "Kael Cadranel",
-            "homepage": "kael.digital"
+            "homepage": "https://kael.digital"
         }
     ],
     "require": {
@@ -22,7 +22,8 @@
         "illuminate/filesystem": "^10.0|^11.0|^12.0",
         "illuminate/support": "^10.0|^11.0|^12.0",
         "illuminate/view": "^10.0|^11.0|^12.0",
-        "nesbot/carbon": "^2.38|^3.0"
+        "nesbot/carbon": "^2.38|^3.0",
+        "livewire/livewire": "^4.0"
     },
     "require-dev": {
         "pestphp/pest": "^3.7",
@@ -41,7 +42,7 @@
     "extra": {
         "laravel": {
             "providers": [
-              "WireKit\\WireKitServiceProvider"
+                "WireKit\\WireKitServiceProvider"
             ]
         }
     },
