@@ -8,8 +8,8 @@ use Illuminate\View\View;
 class Group extends Component
 {
     public function __construct(
+        public bool $inGroup = true,
     ) {}
-
 
     public function render(): View
     {

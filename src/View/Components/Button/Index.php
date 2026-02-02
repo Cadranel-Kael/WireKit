@@ -7,44 +7,45 @@ use Illuminate\View\View;
 
 class Index extends Component
 {
+    public string $colorClass = '';
+
     public function __construct(
-        public string $link = '',
+        public string $as = 'button',
+        public string $href = '',
         public ?string $label = '',
         public bool $loading = false,
         public string $variant = '',
         public string $size = '',
         public string $icon = '',
-        public string $iconRight = '',
         public bool $square = false,
-    ) {}
+        public string $tooltip = '',
+        public string $color = '',
+        public bool $inset = false,
+    ) {
+        if ($this->color) {
+            $this->colorClass = getColorClass($this->color, variant: 'solid', context: 'button');
+        }
+    }
 
     public function variantClass()
     {
         return match ($this->variant) {
-            'primary' => 'bg-accent text-accent-foreground shadow hover:bg-accent/90',
-            'filled' => 'bg-core-100 text-core-950 hover:bg-core-200',
-            'danger' => 'bg-danger text-danger-content shadow hover:bg-danger/90',
-            'ghost' => 'bg-none text-content hover:bg-core-100',
-            default => 'bg-white border-core-200 border text-800 shadow hover:bg-core-50',
+            'primary' => 'bg-accent text-accent-foreground shadow-xs hover:bg-accent/90 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
+            'filled' => 'bg-fill text-fill-foreground hover:bg-fill/60 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
+            'danger' => 'bg-danger text-danger-foreground shadow-xs hover:bg-danger/90 focus-visible:ring-danger/50 focus-visible:ring-4 outline-none',
+            'ghost' => 'bg-none text-core-900 hover:bg-fill dark:text-white dark:hover:bg-core-700 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
+            'custom' => '',
+            default => 'bg-white dark:bg-core-700 not-group-[.button-group]:border not-group-[.button-group]:border-core-200 dark:not-group-[.button-group]:border-core-600 text-core-900 dark:text-white shadow-xs hover:bg-core-50 dark:hover:bg-core-500 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
         };
     }
 
     public function sizeClass()
     {
-        if ($this->square && $this->icon) {
-            return match ($this->size) {
-                'xs' => 'h-6 w-6',
-                'sm' => 'h-8 w-8',
-                default => 'h-9 w-9'
-            };
-        } else {
-            return match ($this->size) {
-                'xs' => 'h-6 px-2',
-                'sm' => 'h-8 px-2',
-                default => 'h-9 px-3'
-            };
-        }
-
+        return match ($this->size) {
+            'xs' => 'not-group-[.input-group]:h-6 px-2'.($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
+            'sm' => 'not-group-[.input-group]:h-8 px-2'.($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
+            default => 'not-group-[.input-group]:h-9 px-3'.($this->inset ? ' -mt-3 -me-3 -mb-3 -ms-3' : '')
+        };
     }
 
     public function render(): View
