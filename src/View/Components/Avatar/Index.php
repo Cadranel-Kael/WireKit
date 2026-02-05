@@ -23,18 +23,11 @@ class Index extends Component
         public string $color = 'core',
         public bool $circle = false,
         public string $badge = '',
-        public string $badgeColor = '',
-        public string $badgePosition = 'right bottom',
-        public bool $badgeCircle = false,
-        public string $badgeVariant = '',
     ) {
         $this->colorClass = getColorClass($this->color);
         if ($this->badge === '1') {
             $this->badge = ' ';
         }
-        $this->badgeColorClass = getColorClass($this->badgeColor, variant: 'solid');
-        $this->badgePositionClass = $this->badgePositionClass();
-        $this->badgeVariantClass = $this->badgeVariantClass();
     }
 
     public function sizeClass()
@@ -48,12 +41,18 @@ class Index extends Component
         };
     }
 
-    public function badgePositionClass()
+    public function badgeColorClass($attributes)
     {
-        if ($this->badgePosition) {
+        return getColorClass($attributes->get('badge:color', ''), variant: 'solid');
+    }
+
+    public function badgePositionClass($attributes)
+    {
+        $positions = $attributes->get('badge:position', 'right bottom');
+        if ($positions) {
             $positionClass = '';
-            $badgePosition = explode(' ', $this->badgePosition);
-            foreach ($badgePosition as $position) {
+            $positions = explode(' ', $positions);
+            foreach ($positions as $position) {
                 $positionClass .= match ($position) {
                     'top' => 'top-0 ',
                     'left' => 'left-0 ',
@@ -67,10 +66,10 @@ class Index extends Component
         }
     }
 
-    public function badgeVariantClass()
+    public function badgeVariantClass($attributes)
     {
-        return match ($this->badgeVariant) {
-            'outline' => 'after:h-2 after:w-2 after:bg-white '.($this->badgeCircle ? 'after:rounded-full' : 'after:rounded'),
+        return match ($attributes->get('badge:variant', 'white')) {
+            'outline' => 'after:h-2 after:w-2 after:bg-white '.($attributes->get('badge:circle', false) ? 'after:rounded-full' : 'after:rounded'),
             default => ''
         };
     }
