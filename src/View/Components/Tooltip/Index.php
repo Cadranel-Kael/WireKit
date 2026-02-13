@@ -2,29 +2,40 @@
 
 namespace WireKit\View\Components\Tooltip;
 
-use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use Str;
 
 class Index extends Component
 {
-    public string $tooltipDirective;
+    public string $tooltip;
 
     public function __construct(
+        public ?string $delay,
         public string $content = '',
-        public bool $toggleable = false,
-        public string $position = 'top',
+        public string $placement = 'top',
+        public bool $arrowless = false,
     ) {
-        $this->createTooltipDirective();
+        $this->tooltip = uniqid('tooltip-');
     }
 
-    public function createTooltipDirective()
+    public function getPlacementClass()
     {
-        if ($this->toggleable) {
-            $this->tooltipDirective = "x-tooltip.on.click.placement.{ $this->position }='tooltip'";
-        }
-        $this->tooltipDirective = "x-tooltip.placement.{ $this->position }='tooltip'";
+        return match ($this->placement) {
+            'top' => 'bottom-full pb-2 left-1/2 -translate-x-1/2',
+            'right' => 'top-1/2 left-full pl-2 -translate-y-1/2',
+            'left' => 'top-1/2 right-full pr-2 -translate-y-1/2',
+            'bottom' => 'top-full pt-2 left-1/2 -translate-x-1/2',
+        };
+    }
+
+    public function getArrowPlacementClass()
+    {
+        return match ($this->placement) {
+            'top' => 'left-1/2 top-full -translate-x-1/2 border-t-inherit',
+            'right' => 'top-1/2 right-full -translate-y-1/2 border-r-inherit',
+            'left' => 'top-1/2 left-full -translate-y-1/2 border-l-inherit',
+            'bottom' => 'left-1/2 bottom-full -translate-x-1/2 border-b-inherit',
+        };
     }
 
     public function render(): View
