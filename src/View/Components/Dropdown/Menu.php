@@ -7,9 +7,8 @@ use Illuminate\View\View;
 
 class Menu extends Component
 {
-
-    public function __construct(
-    ) {
+    public function __construct()
+    {
     }
 
     public function render(): View
