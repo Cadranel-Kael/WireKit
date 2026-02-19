@@ -1,6 +1,7 @@
 import { Menu } from '../menu/Menu';
 import { MenuController } from '../menu/MenuController';
 import { MenuManager } from '../menu/MenuManager';
+import { uniqid } from '../../helpers/uniqid';
 
 export class Dropdown implements MenuController {
     private menu: Menu;
@@ -19,9 +20,16 @@ export class Dropdown implements MenuController {
 
         this.menu = new Menu(menuEl, undefined, this.manager);
 
-        this.trigger.addEventListener('click', () => {
-            this.toggle();
-        });
+        const menuId = uniqid('menu-');
+        const triggerId = uniqid('trigger-');
+
+        this.trigger.setAttribute('aria-controls', menuId);
+        this.trigger.setAttribute('id', triggerId);
+
+        this.menu.getEl().setAttribute('id', menuId);
+        this.menu.getEl().setAttribute('aria-labelledby', triggerId);
+
+        this.attachTargetListeners();
 
         this.registerAllMenus(this.manager);
 
@@ -85,5 +93,29 @@ export class Dropdown implements MenuController {
 
     destroy(): void {
         throw new Error('Method not implemented.');
+    }
+
+    private handleKeyDown(e: KeyboardEvent): void {
+        if (!['ArrowDown', 'ArrowUp'].includes(e.key)) return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (e.key === 'ArrowDown') {
+            this.open();
+            this.menu.activate(0);
+        }
+
+        if (e.key === 'ArrowUp') {
+            this.open();
+            this.menu.activateLast();
+        }
+    }
+
+    private attachTargetListeners() {
+        this.trigger.addEventListener('click', () => {
+            this.toggle();
+        });
+        this.trigger.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 }

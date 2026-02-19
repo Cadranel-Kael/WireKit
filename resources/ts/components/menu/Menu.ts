@@ -50,6 +50,10 @@ export class Menu {
         return this.items.findIndex((item) => item === query);
     }
 
+    public activateLast() {
+        this.activate(this.items.length - 1);
+    }
+
     public activate(index: number) {
         if (index < 0 || index >= this.items.length) return;
 

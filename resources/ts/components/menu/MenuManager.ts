@@ -133,7 +133,7 @@ export class MenuManager {
      * @param e - The keyboard event
      */
     private handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' || e.key === 'Tab') {
             this.closeAllControllers();
             return;
         }
