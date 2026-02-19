@@ -1,5 +1,9 @@
 {
-    "private": true,
+    "name": "cadranel-kael/wire-kit",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Cadranel-Kael/WireKit"
+    },
     "type": "module",
     "devDependencies": {
         "@tailwindcss/vite": "^4.1.6",
