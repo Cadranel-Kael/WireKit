@@ -31,7 +31,7 @@ export class MenuManager {
      * Removes a menu from the manager's tracking.
      * @param menu - The menu instance to unregister
      */
-    public unRegisterMenu(menu: Menu) {
+    public unregisterMenu(menu: Menu) {
         this.menus = this.menus.filter((m) => m !== menu);
     }
 
@@ -172,6 +172,11 @@ export class MenuManager {
         targetMenu.handleMouseOver(e);
     };
 
+    /**
+     * Handles global click events to detect clicks outside of any menu controllers.
+     * @param e
+     * @private
+     */
     private handleClickAway(e: MouseEvent) {
         const target = e.target as HTMLElement;
         if (Array.from(this.controllers.keys()).some((controller) => controller.containsElement(target))) return;
@@ -231,5 +236,6 @@ export class MenuManager {
     public destroy() {
         document.removeEventListener('keydown', this.handleKeyDown);
         document.removeEventListener('mouseover', this.handleMouseOver);
+        document.removeEventListener('click', this.handleClickAway.bind(this));
     }
 }

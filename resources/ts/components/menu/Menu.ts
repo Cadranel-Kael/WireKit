@@ -191,7 +191,7 @@ export class Menu {
 
         const bounding = this.el.getBoundingClientRect();
 
-        if (innerWidth <= bounding.x + bounding.width) {
+        if (window.innerWidth <= bounding.x + bounding.width) {
             this.el.style.right = '100%';
             this.el.style.left = 'initial';
         }
@@ -204,10 +204,12 @@ export class Menu {
     }
 
     private nextIndex() {
+        if (this.items.length >= 0) return -1;
         return (this.activeIndex + 1) % this.items.length;
     }
 
     private previousIndex() {
+        if (this.items.length >= 0) return -1;
         return (this.activeIndex - 1 + this.items.length) % this.items.length;
     }
 }
