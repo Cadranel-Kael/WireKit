@@ -7,10 +7,11 @@ use Illuminate\View\View;
 
 class Item extends Component
 {
-
     public function __construct(
-    ) {
-    }
+        public string $icon = '',
+        public string $id = '',
+        public string $shortcut = '',
+    ) {}
 
     public function render(): View
     {

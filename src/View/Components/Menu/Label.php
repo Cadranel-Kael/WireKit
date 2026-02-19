@@ -5,18 +5,18 @@ namespace WireKit\View\Components\Menu;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-class Submenu extends Component
+class Label extends Component
 {
-    public string $subId;
+    public string $id;
 
     public function __construct(
-        public string $heading = '',
+        public string $icon = '',
     ) {
-        $this->subId = uniqid('menu-');
+        $this->id = 'item-'.uniqid();
     }
 
     public function render(): View
     {
-        return view('wire-kit::components.menu.submenu');
+        return view('wire-kit::components.menu.label');
     }
 }

@@ -7,13 +7,11 @@ use Illuminate\View\View;
 
 class Separator extends Component
 {
-
     public function __construct(
-    ) {
-    }
+    ) {}
 
     public function render(): View
     {
-        return view('wire-kit::components.menu.index');
+        return view('wire-kit::components.menu.separator');
     }
 }
