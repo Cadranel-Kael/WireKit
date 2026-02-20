@@ -9,12 +9,13 @@ export class Accordion {
     private onTransitionEnd?: (e: TransitionEvent) => void;
 
     constructor(private el: HTMLElement) {
-        this.expanded = el.dataset.wireExpanded === 'true' ? true : false;
+        this.expanded = el.dataset.wireExpanded === 'true';
         this.heading = el.querySelector('[data-wire-accordion-heading]') as HTMLElement;
         this.content = el.querySelector('[data-wire-accordion-content]') as HTMLElement;
         this.heading.addEventListener('click', () => this.toggle());
         this.groupId = el.dataset.wireGroup;
-        this.transition = el.dataset.wireTransition === 'true';
+        const isReduced = window.matchMedia('(prefers-reduced-motion)').matches;
+        this.transition = el.dataset.wireTransition === 'true' && !isReduced;
         this.sync();
     }
 
@@ -44,7 +45,7 @@ export class Accordion {
     }
 
     private measure() {
-        this.content.style.display = '';
+        this.content.style.display = 'block';
         this.content.style.height = 'auto';
         return this.content.scrollHeight;
     }
@@ -57,12 +58,12 @@ export class Accordion {
         this.heading.ariaExpanded = String(this.expanded);
 
         if (!this.transition) {
-            this.content.style.display = this.expanded ? '' : 'none';
+            this.content.style.display = this.expanded ? 'block' : 'none';
             return;
         }
         this.height = this.measure();
         if (this.expanded) {
-            this.content.style.display = '';
+            this.content.style.display = 'block';
             this.content.style.overflow = 'hidden';
             this.content.style.height = '0px';
             this.content.style.transition = 'height 300ms';

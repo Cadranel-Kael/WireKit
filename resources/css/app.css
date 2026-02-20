@@ -3,11 +3,7 @@
 @custom-variant data-active (&[data-wirekit-state~="active"]);
 
 @layer utilities {
-    [data-wire-tooltip-content] {
-        display: none;
-    }
-
-    [data-wire-menu] {
+    [data-wire-tooltip-content], [data-wire-expanded="false"] > [data-wire-accordion-content], [data-wire-menu] {
         display: none;
     }
 }
