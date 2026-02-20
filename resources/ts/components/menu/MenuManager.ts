@@ -62,6 +62,7 @@ export class MenuManager {
     public showMenu(controller: MenuController) {
         const menu = controller.getMenu();
         menu.getEl().style.display = 'block';
+        menu.getEl().focus();
         this.controllers.set(controller, true);
         this.closeAllSubmenus(menu);
 

@@ -77,7 +77,6 @@ export class Dropdown implements MenuController {
         if (!force && this.isOpen()) return;
 
         this.manager.showMenu(this);
-        this.menu.getEl().focus();
         this.trigger.setAttribute('aria-expanded', 'true');
 
         this.trigger.dispatchEvent(new CustomEvent('dropdown:open'));
