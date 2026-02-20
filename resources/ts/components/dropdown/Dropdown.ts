@@ -28,7 +28,7 @@ export class Dropdown implements MenuController {
     constructor(private el: HTMLElement) {
         this.initializeItems();
         this.attachTargetListeners();
-        this.close();
+        this.close(true);
     }
 
     /**
@@ -70,9 +70,11 @@ export class Dropdown implements MenuController {
      *
      * Sets the menu to visible, focuses on it, updates ARIA attributes,
      * and dispatches a 'dropdown:open' event. Does nothing if already open.
+     *
+     * @param force - If true, forces the menu to open even if it is already open
      */
-    public open(): void {
-        if (this.isOpen()) return;
+    public open(force: boolean = false): void {
+        if (!force && this.isOpen()) return;
 
         this.manager.showMenu(this);
         this.menu.getEl().focus();
@@ -86,9 +88,11 @@ export class Dropdown implements MenuController {
      *
      * Hides the menu, updates ARIA attributes, and dispatches a 'dropdown:close' event.
      * Does nothing if already closed.
+     *
+     * @param force - If true, forces the menu to close even if it is already closed
      */
-    public close(): void {
-        if (!this.isOpen()) return;
+    public close(force: boolean = false): void {
+        if (!force && !this.isOpen()) return;
 
         this.manager.hideMenu(this);
         this.trigger.setAttribute('aria-expanded', 'false');

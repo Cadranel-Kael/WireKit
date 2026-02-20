@@ -204,12 +204,12 @@ export class Menu {
     }
 
     private nextIndex() {
-        if (this.items.length >= 0) return -1;
+        if (this.items.length <= 0) return -1;
         return (this.activeIndex + 1) % this.items.length;
     }
 
     private previousIndex() {
-        if (this.items.length >= 0) return -1;
+        if (this.items.length <= 0) return -1;
         return (this.activeIndex - 1 + this.items.length) % this.items.length;
     }
 }
