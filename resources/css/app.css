@@ -20,3 +20,47 @@ body:has(> [data-wire-header]) {
     grid-auto-rows: auto 1fr auto;
     grid-auto-columns: min-content 1fr min-content;
 }
+
+html {
+    scrollbar-gutter: stable;
+}
+
+html:has([data-wire-modal][open]) {
+    overflow: hidden;
+}
+
+[data-wire-modal] {
+    opacity: 0;
+
+    &[data-wire-position="right"][open] {
+        transform: translateX(0);
+
+        @starting-style {
+            transform: translateX(100%);
+        }
+    }
+
+    &[data-wire-position="left"][open] {
+        transform: translateX(0);
+
+        @starting-style {
+            transform: translateX(-100%);
+        }
+    }
+
+    &[data-wire-position="bottom"][open] {
+        transform: translateY(0);
+
+        @starting-style {
+            transform: translateY(100%);
+        }
+    }
+
+    &[open] {
+        opacity: 1;
+
+        @starting-style {
+            opacity: 0;
+        }
+    }
+}
