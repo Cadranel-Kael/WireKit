@@ -4,6 +4,7 @@ import { initDropdowns } from './components/dropdown/initDropdowns';
 import { initToggles } from './components/toggles/initToggles';
 import { initTooltips } from './components/tooltip/initTooltips';
 import { initModals } from './components/modal/initModals';
+import { initTabList } from './components/tab/initTabList';
 
 document.addEventListener('DOMContentLoaded', () => {
     initToggles();
@@ -12,4 +13,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
     initDropdowns();
     initModals();
+    initTabList();
 });

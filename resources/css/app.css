@@ -1,11 +1,16 @@
 @import '../../../../../resources/css/app.css';
 
-@custom-variant data-active (&[data-wirekit-state~="active"]);
+@custom-variant data-active (&[data-state~="active"]);
 
-@layer utilities {
-    [data-wire-tooltip-content], [data-wire-expanded="false"] > [data-wire-accordion-content], [data-wire-menu] {
+@layer base {
+    [data-wire-tooltip-content], [data-wire-expanded="false"] > [data-wire-accordion-content], [data-wire-menu], [data-wire-tabs] [data-wire-tab-panel]:not(:first-child) {
         display: none;
     }
+}
+
+@utility rounded-auto-* {
+    --height: --value(--radius-*, [length]);
+    border-radius: calc(var(--height) * var(--radius-factor, 0.15));
 }
 
 body:has(> [data-wire-sidebar] + [data-wire-header]) {
