@@ -1,42 +1,42 @@
 export class Tooltip {
-    private trigger: HTMLElement | null;
-    private content: HTMLElement | null;
-    private isVisible: boolean = false;
-    private isFocused: boolean = false;
-    private hasDelay: boolean = false;
-    private delay?: number;
-    private timeout?: number;
-    private boundKeyDownHandler: (e: KeyboardEvent) => void;
+    private _trigger: HTMLElement | null;
+    private _content: HTMLElement | null;
+    private _isVisible: boolean = false;
+    private _isFocused: boolean = false;
+    private _hasDelay: boolean = false;
+    private _delay?: number;
+    private _timeout?: number;
+    private _boundKeyDownHandler: (e: KeyboardEvent) => void;
 
-    constructor(private el: HTMLElement) {
-        this.content = el.querySelector('[data-wire-tooltip-content]');
-        this.trigger = el.querySelector('[data-wire-tooltip-trigger]');
-        this.hasDelay = el.hasAttribute('data-wire-delay');
-        if (this.hasDelay) {
-            this.delay = Number(el.dataset.wireDelay);
-            if (!this.delay || this.delay === 1) {
-                this.delay = 300;
+    constructor(private _el: HTMLElement) {
+        this._content = _el.querySelector('[data-wire-tooltip-content]');
+        this._trigger = _el.querySelector('[data-wire-tooltip-trigger]');
+        this._hasDelay = _el.hasAttribute('data-wire-delay');
+        if (this._hasDelay) {
+            this._delay = Number(_el.dataset.wireDelay);
+            if (!this._delay || this._delay === 1) {
+                this._delay = 300;
             }
         }
 
-        this.boundKeyDownHandler = this.onKeyDown.bind(this);
+        this._boundKeyDownHandler = this.onKeyDown.bind(this);
         this.attachEventListeners();
         this.sync();
     }
 
     private attachEventListeners() {
-        if (!this.content || !this.trigger) return;
-        this.trigger.addEventListener('mouseenter', this.onMouseEnter.bind(this));
-        this.content.addEventListener('mouseenter', this.onMouseEnter.bind(this));
-        this.trigger.addEventListener('focus', this.onFocus.bind(this));
-        this.trigger.addEventListener('mouseleave', this.onMouseLeave.bind(this));
-        this.content.addEventListener('mouseleave', this.onMouseLeave.bind(this));
-        this.trigger.addEventListener('blur', this.onBlur.bind(this));
-        document.addEventListener('keydown', this.boundKeyDownHandler);
+        if (!this._content || !this._trigger) return;
+        this._trigger.addEventListener('mouseenter', this.onMouseEnter.bind(this));
+        this._content.addEventListener('mouseenter', this.onMouseEnter.bind(this));
+        this._trigger.addEventListener('focus', this.onFocus.bind(this));
+        this._trigger.addEventListener('mouseleave', this.onMouseLeave.bind(this));
+        this._content.addEventListener('mouseleave', this.onMouseLeave.bind(this));
+        this._trigger.addEventListener('blur', this.onBlur.bind(this));
+        document.addEventListener('keydown', this._boundKeyDownHandler);
     }
 
     private toggle(force?: boolean) {
-        this.isVisible = force ?? !this.isVisible;
+        this._isVisible = force ?? !this._isVisible;
         this.sync();
     }
 
@@ -57,16 +57,16 @@ export class Tooltip {
     }
 
     private onKeyDown(e: KeyboardEvent) {
-        if (this.isVisible && e.key === 'Escape') {
+        if (this._isVisible && e.key === 'Escape') {
             this.hide();
         }
     }
 
     private onMouseEnter() {
-        if (this.delay) {
-            this.timeout = window.setTimeout(() => {
+        if (this._delay) {
+            this._timeout = window.setTimeout(() => {
                 this.show();
-            }, this.delay);
+            }, this._delay);
             return;
         }
         this.show();
@@ -74,28 +74,28 @@ export class Tooltip {
 
     private onMouseLeave() {
         this.clearTimeout();
-        if (this.isFocused) return;
+        if (this._isFocused) return;
         this.toggle(false);
     }
 
     private clearTimeout() {
-        if (this.timeout) {
-            window.clearTimeout(this.timeout);
-            this.timeout = undefined;
+        if (this._timeout) {
+            window.clearTimeout(this._timeout);
+            this._timeout = undefined;
         }
     }
 
     private sync() {
-        if (!this.content) return;
-        this.isFocused = document.activeElement === this.trigger;
-        if (!this.isVisible) {
-            this.content.style.display = 'none';
+        if (!this._content) return;
+        this._isFocused = document.activeElement === this._trigger;
+        if (!this._isVisible) {
+            this._content.style.display = 'none';
         } else {
-            this.content.style.display = 'block';
+            this._content.style.display = 'block';
         }
     }
 
     public destroy() {
-        document.removeEventListener('keydown', this.boundKeyDownHandler);
+        document.removeEventListener('keydown', this._boundKeyDownHandler);
     }
 }

@@ -14,7 +14,7 @@ export function initToggles(root: ParentNode = document) {
     }
 
     for (const [_, groupToggles] of groups) {
-        const exclusive = groupToggles[0].isExlcusive;
+        const exclusive = groupToggles[0].exclusive;
         new ToggleGroup(groupToggles, exclusive);
     }
 

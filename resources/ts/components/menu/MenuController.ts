@@ -9,7 +9,7 @@ export interface MenuController {
      * Retrieves the Menu instance associated with this controller.
      * @returns The Menu instance being controlled
      */
-    getMenu(): Menu;
+    get menu(): Menu;
 
     /**
      * Opens and displays the menu.

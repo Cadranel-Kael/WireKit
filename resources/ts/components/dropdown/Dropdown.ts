@@ -8,9 +8,9 @@ import { uniqid } from '../../helpers/uniqid';
  * Implements MenuController interface for integration with MenuManager.
  */
 export class Dropdown implements MenuController {
-    private menu!: Menu;
-    private trigger!: HTMLButtonElement;
-    private manager!: MenuManager;
+    private _menu!: Menu;
+    private _trigger!: HTMLButtonElement;
+    private _manager!: MenuManager;
 
     /**
      * Constructor
@@ -48,7 +48,7 @@ export class Dropdown implements MenuController {
      * @param manager - The MenuManager instance to register submenus with
      */
     private registerSubmenusRecursively(menu: Menu, manager: MenuManager) {
-        menu.getItems().forEach((item) => {
+        menu.items.forEach((item) => {
             if (item.subMenu) {
                 manager.registerMenu(item.subMenu);
                 this.registerSubmenusRecursively(item.subMenu, manager);
@@ -61,8 +61,8 @@ export class Dropdown implements MenuController {
      *
      * @returns The Menu object managed by this dropdown
      */
-    getMenu(): Menu {
-        return this.menu;
+    get menu(): Menu {
+        return this._menu;
     }
 
     /**
@@ -73,13 +73,13 @@ export class Dropdown implements MenuController {
      *
      * @param force - If true, forces the menu to open even if it is already open
      */
-    public open(force: boolean = false): void {
+    open(force: boolean = false): void {
         if (!force && this.isOpen()) return;
 
-        this.manager.showMenu(this);
-        this.trigger.setAttribute('aria-expanded', 'true');
+        this._manager.showMenu(this);
+        this._trigger.setAttribute('aria-expanded', 'true');
 
-        this.trigger.dispatchEvent(new CustomEvent('dropdown:open'));
+        this._trigger.dispatchEvent(new CustomEvent('dropdown:open'));
     }
 
     /**
@@ -90,13 +90,13 @@ export class Dropdown implements MenuController {
      *
      * @param force - If true, forces the menu to close even if it is already closed
      */
-    public close(force: boolean = false): void {
+    close(force: boolean = false): void {
         if (!force && !this.isOpen()) return;
 
-        this.manager.hideMenu(this);
-        this.trigger.setAttribute('aria-expanded', 'false');
+        this._manager.hideMenu(this);
+        this._trigger.setAttribute('aria-expanded', 'false');
 
-        this.trigger.dispatchEvent(new CustomEvent('dropdown:close'));
+        this._trigger.dispatchEvent(new CustomEvent('dropdown:close'));
     }
 
     /**
@@ -105,7 +105,7 @@ export class Dropdown implements MenuController {
      * @returns True if the menu is open, false otherwise
      */
     private isOpen(): boolean {
-        return this.manager.isMenuOpen(this);
+        return this._manager.isMenuOpen(this);
     }
 
     /**
@@ -127,7 +127,7 @@ export class Dropdown implements MenuController {
      * @returns True if the element is part of this dropdown, false otherwise
      */
     containsElement(element: HTMLElement): boolean {
-        return this.menu.getEl().contains(element) || this.trigger.contains(element);
+        return this.menu.el.contains(element) || this._trigger.contains(element);
     }
 
     /**
@@ -136,7 +136,7 @@ export class Dropdown implements MenuController {
      * @throws Error - Currently not implemented
      */
     destroy(): void {
-        this.manager.unregisterController(this);
+        this._manager.unregisterController(this);
     }
 
     /**
@@ -173,11 +173,11 @@ export class Dropdown implements MenuController {
      * - keydown: Handles keyboard navigation (ArrowUp, ArrowDown)
      */
     private attachTargetListeners() {
-        this.trigger.addEventListener('click', () => {
+        this._trigger.addEventListener('click', () => {
             this.toggle();
         });
 
-        this.trigger.addEventListener('keydown', this.handleKeyDown.bind(this));
+        this._trigger.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
     /**
@@ -190,28 +190,28 @@ export class Dropdown implements MenuController {
      * @throws Error if the menu or trigger elements are not found in the DOM
      */
     private initializeItems() {
-        this.manager = MenuManager.getInstance();
+        this._manager = MenuManager.getInstance();
 
         const menuEl = this.el.querySelector('[data-wire-menu]') as HTMLElement;
-        this.trigger = this.el.querySelector('[data-wire-dropdown-trigger]') as HTMLButtonElement;
+        this._trigger = this.el.querySelector('[data-wire-dropdown-trigger]') as HTMLButtonElement;
 
-        if (!menuEl || !this.trigger) {
+        if (!menuEl || !this._trigger) {
             throw new Error('Dropdown menu or trigger element not found in the DOM');
         }
 
-        this.menu = new Menu(menuEl, undefined, this.manager);
+        this._menu = new Menu(menuEl, undefined, this._manager);
 
         const menuId = uniqid('menu-');
         const triggerId = uniqid('trigger-');
 
-        this.trigger.setAttribute('aria-controls', menuId);
-        this.trigger.setAttribute('id', triggerId);
+        this._trigger.setAttribute('aria-controls', menuId);
+        this._trigger.setAttribute('id', triggerId);
 
-        this.menu.getEl().setAttribute('id', menuId);
-        this.menu.getEl().setAttribute('aria-labelledby', triggerId);
+        this._menu.el.setAttribute('id', menuId);
+        this._menu.el.setAttribute('aria-labelledby', triggerId);
 
-        this.registerAllMenus(this.manager);
+        this.registerAllMenus(this._manager);
 
-        this.manager.registerController(this);
+        this._manager.registerController(this);
     }
 }

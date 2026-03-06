@@ -7,10 +7,10 @@ import { MenuController } from './MenuController';
  * and tracks user interaction mode (keyboard vs mouse).
  */
 export class MenuManager {
-    private static instance: MenuManager | null = null;
-    private controllers: Map<MenuController, boolean> = new Map();
-    private menus: Menu[] = [];
-    private interaction: 'mouse' | 'keyboard' = 'keyboard';
+    private static _instance: MenuManager | null = null;
+    private _controllers: Map<MenuController, boolean> = new Map();
+    private _menus: Menu[] = [];
+    private _interaction: 'mouse' | 'keyboard' = 'keyboard';
 
     constructor() {
         this.attachGlobalListeners();
@@ -21,9 +21,9 @@ export class MenuManager {
      * Prevents duplicate registrations.
      * @param menu - The menu instance to register
      */
-    public registerMenu(menu: Menu) {
-        if (!this.menus.includes(menu)) {
-            this.menus.push(menu);
+    registerMenu(menu: Menu) {
+        if (!this._menus.includes(menu)) {
+            this._menus.push(menu);
         }
     }
 
@@ -31,8 +31,8 @@ export class MenuManager {
      * Removes a menu from the manager's tracking.
      * @param menu - The menu instance to unregister
      */
-    public unregisterMenu(menu: Menu) {
-        this.menus = this.menus.filter((m) => m !== menu);
+    unregisterMenu(menu: Menu) {
+        this._menus = this._menus.filter((m) => m !== menu);
     }
 
     /**
@@ -40,9 +40,9 @@ export class MenuManager {
      * Initializes the controller's open state to false.
      * @param controller - The controller to register
      */
-    public registerController(controller: MenuController) {
-        if (!this.controllers.has(controller)) {
-            this.controllers.set(controller, false);
+    registerController(controller: MenuController) {
+        if (!this._controllers.has(controller)) {
+            this._controllers.set(controller, false);
         }
     }
 
@@ -50,8 +50,8 @@ export class MenuManager {
      * Removes a controller from the manager's tracking.
      * @param controller - The controller to unregister
      */
-    public unregisterController(controller: MenuController) {
-        this.controllers.delete(controller);
+    unregisterController(controller: MenuController) {
+        this._controllers.delete(controller);
     }
 
     /**
@@ -59,11 +59,11 @@ export class MenuManager {
      * Updates the controller's open state.
      * @param controller - The controller whose menu should be shown
      */
-    public showMenu(controller: MenuController) {
-        const menu = controller.getMenu();
-        menu.getEl().style.display = 'block';
-        menu.getEl().focus();
-        this.controllers.set(controller, true);
+    showMenu(controller: MenuController) {
+        const menu = controller.menu;
+        menu.el.style.display = 'block';
+        menu.el.focus();
+        this._controllers.set(controller, true);
         this.closeAllSubmenus(menu);
 
         menu.activate(-1);
@@ -74,10 +74,10 @@ export class MenuManager {
      * Also closes all submenus recursively.
      * @param controller - The controller whose menu should be hidden
      */
-    public hideMenu(controller: MenuController) {
-        const menu = controller.getMenu();
-        menu.getEl().style.display = 'none';
-        this.controllers.set(controller, false);
+    hideMenu(controller: MenuController) {
+        const menu = controller.menu;
+        menu.el.style.display = 'none';
+        this._controllers.set(controller, false);
 
         menu.deactivate();
         this.closeAllSubmenus(menu);
@@ -88,8 +88,8 @@ export class MenuManager {
      * @param controller - The controller to check
      * @returns True if the menu is open, false otherwise
      */
-    public isMenuOpen(controller: MenuController): boolean {
-        return this.controllers.get(controller) || false;
+    isMenuOpen(controller: MenuController): boolean {
+        return this._controllers.get(controller) || false;
     }
 
     /**
@@ -97,7 +97,7 @@ export class MenuManager {
      * @param menu - The parent menu whose submenus should be closed
      */
     private closeAllSubmenus(menu: Menu) {
-        menu.getItems().forEach((item) => {
+        menu.items.forEach((item) => {
             if (item.subMenu) {
                 item.closeSub();
                 this.closeAllSubmenus(item.subMenu);
@@ -110,11 +110,11 @@ export class MenuManager {
      * Creates a new instance if one doesn't exist.
      * @returns The MenuManager singleton instance
      */
-    public static getInstance(): MenuManager {
-        if (!MenuManager.instance) {
-            MenuManager.instance = new MenuManager();
+    static getInstance(): MenuManager {
+        if (!MenuManager._instance) {
+            MenuManager._instance = new MenuManager();
         }
-        return MenuManager.instance;
+        return MenuManager._instance;
     }
 
     /**
@@ -143,7 +143,7 @@ export class MenuManager {
             return;
         }
 
-        this.interaction = 'keyboard';
+        this._interaction = 'keyboard';
 
         const activeElement = document.activeElement;
         if (!activeElement) return;
@@ -165,7 +165,7 @@ export class MenuManager {
      * @param e - The mouse event
      */
     private handleMouseOver = (e: MouseEvent) => {
-        this.interaction = 'mouse';
+        this._interaction = 'mouse';
 
         const targetMenu = this.findActiveMenu(e.target as HTMLElement);
         if (!targetMenu) return;
@@ -174,13 +174,13 @@ export class MenuManager {
     };
 
     /**
-     * Handles global click events to detect clicks outside of any menu controllers.
+     * Handles global click events to detect clicks any menu controllers.
      * @param e
      * @private
      */
     private handleClickAway(e: MouseEvent) {
         const target = e.target as HTMLElement;
-        if (Array.from(this.controllers.keys()).some((controller) => controller.containsElement(target))) return;
+        if (Array.from(this._controllers.keys()).some((controller) => controller.containsElement(target))) return;
 
         this.closeAllControllers();
     }
@@ -190,17 +190,17 @@ export class MenuManager {
      * Iterates through all registered controllers and calls their close method.
      */
     private closeAllControllers() {
-        this.controllers.forEach((isOpen, controller) => {
+        this._controllers.forEach((isOpen, controller) => {
             if (isOpen) controller.close();
         });
     }
 
     /**
-     * Returns all registered menus.
+     * Returns all registered menus.C
      * @returns Array of all registered Menu instances
      */
-    public getMenus() {
-        return this.menus;
+    get menus() {
+        return this._menus;
     }
 
     /**
@@ -209,32 +209,30 @@ export class MenuManager {
      * @returns The menu containing the element, or undefined if not found
      */
     private findActiveMenu(activeElement: HTMLElement) {
-        return this.menus.find(
-            (menu) => menu.getEl() === activeElement || menu.getEl() === activeElement.parentElement,
-        );
+        return this.menus.find((menu) => menu.el === activeElement || menu.el === activeElement.parentElement);
     }
 
     /**
      * Sets the current interaction mode (mouse or keyboard).
      * @param mode - The interaction mode to set
      */
-    setInteraction(mode: 'mouse' | 'keyboard') {
-        this.interaction = mode;
+    set interaction(mode: 'mouse' | 'keyboard') {
+        this._interaction = mode;
     }
 
     /**
      * Gets the current interaction mode.
      * @returns The current interaction mode ('mouse' or 'keyboard')
      */
-    getInteraction() {
-        return this.interaction;
+    get interaction() {
+        return this._interaction;
     }
 
     /**
      * Cleans up the manager by removing all global event listeners.
      * Should be called when the manager is no longer needed.
      */
-    public destroy() {
+    destroy() {
         document.removeEventListener('keydown', this.handleKeyDown);
         document.removeEventListener('mouseover', this.handleMouseOver);
         document.removeEventListener('click', this.handleClickAway.bind(this));

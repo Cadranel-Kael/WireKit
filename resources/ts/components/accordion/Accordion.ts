@@ -1,3 +1,7 @@
+/**
+ * An accordion item that can belong to a group.
+ * @class
+ */
 export class Accordion {
     private _isExpanded: boolean;
     private _heading: HTMLElement;
@@ -9,6 +13,10 @@ export class Accordion {
     private _onTransitionEnd?: (e: TransitionEvent) => void;
     private readonly _el: HTMLElement;
 
+    /**
+     * Create an accordion item.
+     * @param el
+     */
     constructor(el: HTMLElement) {
         this._el = el;
         this._isExpanded = el.dataset.wireExpanded === 'true';
@@ -29,7 +37,7 @@ export class Accordion {
         return this._groupId;
     }
 
-    public collapse() {
+    collapse() {
         this.toggle(false);
     }
 
@@ -37,7 +45,7 @@ export class Accordion {
         return this._isExpanded;
     }
 
-    public toggle(force?: boolean) {
+    toggle(force?: boolean) {
         const next = force ?? !this._isExpanded;
         if (next === this._isExpanded) return;
 
@@ -46,7 +54,7 @@ export class Accordion {
         this._listeners.forEach((l) => l(this));
     }
 
-    public onChange(fn: (a: Accordion) => void) {
+    onChange(fn: (a: Accordion) => void) {
         this._listeners.push(fn);
     }
 

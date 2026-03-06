@@ -1,21 +1,27 @@
 export class Toggle {
-    private active: boolean;
-    private exclusive: boolean;
-    private listeners: Array<(t: Toggle) => void> = [];
+    private _active: boolean;
+    private _exclusive: boolean;
+    private _listeners: Array<(t: Toggle) => void> = [];
+    private _el: HTMLButtonElement;
 
-    constructor(private el: HTMLButtonElement) {
-        this.active = el.dataset.wireActive === 'true';
-        this.exclusive = el.dataset.wireExclusive === 'true';
+    constructor(el: HTMLButtonElement) {
+        this._el = el;
+        this._active = el.dataset.wireActive === 'true';
+        this._exclusive = el.dataset.wireExclusive === 'true';
         this.sync();
-        el.addEventListener('click', () => this.toggle());
+        this._el.addEventListener('click', () => this.toggle());
     }
 
-    get isExlcusive() {
-        return this.exclusive;
+    get exclusive() {
+        return this._exclusive;
     }
 
-    get isActive() {
-        return this.active;
+    get el() {
+        return this._el;
+    }
+
+    get active() {
+        return this._active;
     }
 
     deactivate() {
@@ -23,20 +29,20 @@ export class Toggle {
     }
 
     toggle(force?: boolean) {
-        const next = force ?? !this.active;
-        if (next === this.active) return;
+        const next = force ?? !this._active;
+        if (next === this._active) return;
 
-        this.active = force ?? !this.active;
+        this._active = force ?? !this._active;
         this.sync();
-        this.listeners.forEach((l) => l(this));
+        this._listeners.forEach((l) => l(this));
     }
 
     private sync() {
-        this.el.dataset.state = this.active ? 'on' : 'off';
-        this.el.ariaPressed = String(this.active);
+        this._el.dataset.state = this._active ? 'on' : 'off';
+        this._el.ariaPressed = String(this._active);
     }
 
     onChange(fn: (t: Toggle) => void) {
-        this.listeners.push(fn);
+        this._listeners.push(fn);
     }
 }

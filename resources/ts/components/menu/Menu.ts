@@ -6,8 +6,11 @@ import { MenuManager } from './MenuManager';
  * Handles keyboard and mouse navigation, submenu management, and focus control.
  */
 export class Menu {
-    private items: MenuItem[] = [];
-    private activeIndex = -1;
+    private _items: MenuItem[] = [];
+    private _activeIndex = -1;
+    private readonly _el: HTMLElement;
+    private _parentItem?: MenuItem;
+    private readonly _manager?: MenuManager;
 
     /**
      * Creates a new Menu instance.
@@ -15,62 +18,63 @@ export class Menu {
      * @param parentItem - Optional parent menu item if this is a submenu
      * @param manager - Optional MenuManager instance for coordinating global interactions
      */
-    constructor(
-        private el: HTMLElement,
-        private parentItem?: MenuItem,
-        private manager?: MenuManager,
-    ) {
+    constructor(el: HTMLElement, parentItem?: MenuItem, manager?: MenuManager) {
+        this._el = el;
+        this._parentItem = parentItem;
+        this._manager = manager;
         this.initializeItems();
         this.attachTargetListeners();
     }
 
     private attachTargetListeners() {
-        this.el.addEventListener('mouseleave', this.handleMouseLeave);
+        this._el.addEventListener('mouseleave', this.handleMouseLeave);
     }
 
     private handleMouseLeave = (e: MouseEvent) => {
-        this.manager?.setInteraction('mouse');
+        if (this._manager) {
+            this._manager.interaction = 'mouse';
+        }
         this.deactivate();
-        this.items.forEach((item) => item.closeSub());
+        this._items.forEach((item) => item.closeSub());
     };
 
-    public getEl() {
-        return this.el;
+    get el() {
+        return this._el;
     }
 
-    public getItems(): MenuItem[] {
-        return this.items;
+    get items(): MenuItem[] {
+        return this._items;
     }
 
-    public setParentItem(item: MenuItem) {
-        this.parentItem = item;
+    set parentItem(item: MenuItem) {
+        this._parentItem = item;
     }
 
-    public getIndex(query: MenuItem): number {
-        return this.items.findIndex((item) => item === query);
+    getIndex(query: MenuItem): number {
+        return this._items.findIndex((item) => item === query);
     }
 
-    public activateLast() {
-        this.activate(this.items.length - 1);
+    activateLast() {
+        this.activate(this._items.length - 1);
     }
 
-    public activate(index: number) {
-        if (index < 0 || index >= this.items.length) return;
+    activate(index: number) {
+        if (index < 0 || index >= this._items.length) return;
 
-        this.activeIndex = index;
+        this._activeIndex = index;
         this.syncItemStates();
 
-        const currentItem = this.items[index];
+        const currentItem = this._items[index];
         currentItem.focus();
 
-        this.items.forEach((item) => {
+        this._items.forEach((item) => {
             if (item.menu.hasParentItem()) {
-                item.menu.getParentItem()?.setActive(false);
+                item.menu.parentItem?.setActive(false);
             }
             if (item.hasSubmenu()) {
                 item.closeSub();
             }
-            if (this.manager?.getInteraction() === 'mouse') {
+            if (this._manager?.interaction === 'mouse') {
                 if (currentItem.hasSubmenu()) {
                     currentItem.openSub();
                 }
@@ -78,12 +82,12 @@ export class Menu {
         });
     }
 
-    public hasSubmenus(): boolean {
-        return this.items.some((item) => item.hasSubmenu());
+    hasSubmenus(): boolean {
+        return this._items.some((item) => item.hasSubmenu());
     }
 
-    public closeSubMenus() {
-        this.items.forEach((item) => {
+    closeSubMenus() {
+        this._items.forEach((item) => {
             if (item.hasSubmenu()) {
                 item.closeSub();
                 if (item.subMenu?.hasSubmenus()) {
@@ -93,19 +97,16 @@ export class Menu {
         });
     }
 
-    public hasParentItem(): boolean {
-        return !!this.parentItem;
+    hasParentItem(): boolean {
+        return !!this._parentItem;
     }
 
-    /**
-     * getParentItem
-     */
-    public getParentItem() {
-        return this.parentItem;
+    get parentItem(): MenuItem | undefined {
+        return this._parentItem;
     }
 
-    public deactivate() {
-        this.activeIndex = -1;
+    deactivate() {
+        this._activeIndex = -1;
         this.syncItemStates();
     }
 
@@ -113,10 +114,10 @@ export class Menu {
        Event Handlers
     -------------------------- */
 
-    public handleMouseOver(e: MouseEvent) {
+    handleMouseOver(e: MouseEvent) {
         const target = e.target as HTMLElement;
 
-        const index = this.items.findIndex((item) => item.el.contains(target));
+        const index = this._items.findIndex((item) => item.el.contains(target));
 
         if (index !== -1) {
             this.activate(index);
@@ -125,7 +126,7 @@ export class Menu {
         }
     }
 
-    public handleKeyboardEvent(e: KeyboardEvent): boolean {
+    handleKeyboardEvent(e: KeyboardEvent): boolean {
         switch (e.key) {
             case 'ArrowDown':
                 this.activate(this.nextIndex());
@@ -150,7 +151,7 @@ export class Menu {
     -------------------------- */
 
     private openSubMenu() {
-        const item = this.items[this.activeIndex];
+        const item = this._items[this._activeIndex];
         if (!item?.subMenu) return false;
 
         item.openSub();
@@ -160,9 +161,9 @@ export class Menu {
     }
 
     private goToParent() {
-        if (!this.parentItem) return false;
+        if (!this._parentItem) return false;
 
-        const parentItem = this.parentItem;
+        const parentItem = this._parentItem;
         const parentMenu = parentItem.menu;
         const index = parentMenu.getIndex(parentItem);
 
@@ -177,39 +178,39 @@ export class Menu {
     -------------------------- */
 
     private initializeItems() {
-        const elements = Array.from(this.el.querySelectorAll<HTMLElement>(':scope > [data-wire-menu-item]'));
+        const elements = Array.from(this._el.querySelectorAll<HTMLElement>(':scope > [data-wire-menu-item]'));
 
-        this.items = elements.map((el) => {
+        this._items = elements.map((el) => {
             const subEl = el.querySelector<HTMLElement>('[data-wire-menu]');
-            const subMenu = subEl ? new Menu(subEl, undefined, this.manager) : undefined;
+            const subMenu = subEl ? new Menu(subEl, undefined, this._manager) : undefined;
             const item = new MenuItem(el, this, subMenu);
 
-            if (subMenu) subMenu.setParentItem(item);
+            if (subMenu) subMenu.parentItem = item;
 
             return item;
         });
 
-        const bounding = this.el.getBoundingClientRect();
+        const bounding = this._el.getBoundingClientRect();
 
         if (window.innerWidth <= bounding.x + bounding.width) {
-            this.el.style.right = '100%';
-            this.el.style.left = 'initial';
+            this._el.style.right = '100%';
+            this._el.style.left = 'initial';
         }
     }
 
     private syncItemStates() {
-        this.items.forEach((item, i) => {
-            item.setActive(i === this.activeIndex);
+        this._items.forEach((item, i) => {
+            item.setActive(i === this._activeIndex);
         });
     }
 
     private nextIndex() {
-        if (this.items.length <= 0) return -1;
-        return (this.activeIndex + 1) % this.items.length;
+        if (this._items.length <= 0) return -1;
+        return (this._activeIndex + 1) % this._items.length;
     }
 
     private previousIndex() {
-        if (this.items.length <= 0) return -1;
-        return (this.activeIndex - 1 + this.items.length) % this.items.length;
+        if (this._items.length <= 0) return -1;
+        return (this._activeIndex - 1 + this._items.length) % this._items.length;
     }
 }

@@ -1,48 +1,48 @@
 import { TabList } from './TabList';
 
 export class Tab {
-    private trigger!: HTMLButtonElement;
-    private panel!: HTMLElement | null;
-    private disabled: boolean = false;
+    private _trigger!: HTMLButtonElement;
+    private _panel!: HTMLElement | null;
+    private _disabled: boolean = false;
 
     constructor(
-        private list: TabList,
-        private name: string,
+        private _list: TabList,
+        private _name: string,
     ) {
         this.initializeItems();
         this.attachTargetListeners();
     }
 
     private initializeItems() {
-        const trigger = document.getElementById(`tab-${this.name}`) as HTMLButtonElement;
-        const panel = document.getElementById(`panel-${this.name}`);
-        this.disabled = trigger.disabled;
+        const trigger = document.getElementById(`tab-${this._name}`) as HTMLButtonElement;
+        const panel = document.getElementById(`panel-${this._name}`);
+        this._disabled = trigger.disabled;
 
-        this.trigger = trigger as HTMLButtonElement;
-        this.panel = panel;
+        this._trigger = trigger as HTMLButtonElement;
+        this._panel = panel;
     }
 
-    public isDisabled(): boolean {
-        return this.disabled;
+    get disabled(): boolean {
+        return this._disabled;
     }
 
-    private attachTargetListeners() {
-        this.trigger.addEventListener('click', this.handleClick);
+    attachTargetListeners() {
+        this._trigger.addEventListener('click', this.handleClick);
     }
 
-    public getPanel(): HTMLElement | null {
-        return this.panel;
+    get panel() {
+        return this._panel;
     }
 
-    public getTrigger(): HTMLButtonElement {
-        return this.trigger;
+    get trigger() {
+        return this._trigger;
     }
 
     private handleClick = (e: MouseEvent) => {
-        if (this.isDisabled()) {
+        if (this._disabled) {
             e.preventDefault();
             return;
         }
-        this.list.show(this);
+        this._list.show(this);
     };
 }

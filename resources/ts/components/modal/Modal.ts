@@ -1,39 +1,37 @@
 export class Modal {
-    private triggers!: NodeListOf<HTMLButtonElement>;
-    private closeButtons!: NodeListOf<HTMLButtonElement>;
+    private _triggers: NodeListOf<HTMLButtonElement>;
+    private _closeButtons: NodeListOf<HTMLButtonElement>;
+    private _el: HTMLDialogElement;
 
-    constructor(private el: HTMLDialogElement) {
-        this.initializeItems();
+    constructor(el: HTMLDialogElement) {
+        this._el = el;
+        this._triggers = document.querySelectorAll(
+            `[data-wire-modal-trigger="${this._el.id}"]`,
+        ) as NodeListOf<HTMLButtonElement>;
+        this._closeButtons = document.querySelectorAll(
+            `[data-wire-modal-close="${this._el.id}"]`,
+        ) as NodeListOf<HTMLButtonElement>;
         this.attachTargetListeners();
     }
 
-    private initializeItems() {
-        this.triggers = document.querySelectorAll(
-            `[data-wire-modal-trigger="${this.el.id}"]`,
-        ) as NodeListOf<HTMLButtonElement>;
-        this.closeButtons = document.querySelectorAll(
-            `[data-wire-modal-close="${this.el.id}"]`,
-        ) as NodeListOf<HTMLButtonElement>;
-    }
-
     private attachTargetListeners() {
-        this.triggers.forEach((trigger: HTMLButtonElement) => {
+        this._triggers.forEach((trigger: HTMLButtonElement) => {
             trigger.addEventListener('click', () => {
-                this.el.showModal();
+                this._el.showModal();
             });
         });
 
-        this.closeButtons.forEach((trigger: HTMLButtonElement) => {
+        this._closeButtons.forEach((trigger: HTMLButtonElement) => {
             trigger.addEventListener('click', () => {
-                this.el.close();
+                this._el.close();
             });
         });
 
-        this.el.addEventListener('click', this.handleClickAway);
+        this._el.addEventListener('click', this.handleClickAway);
     }
 
     private handleClickAway = (event: MouseEvent) => {
-        const rect = this.el.getBoundingClientRect();
+        const rect = this._el.getBoundingClientRect();
         const isInDialog =
             rect.top <= event.clientY &&
             event.clientY <= rect.top + rect.height &&
@@ -41,7 +39,7 @@ export class Modal {
             event.clientX <= rect.left + rect.width;
 
         if (!isInDialog) {
-            this.el.close();
+            this._el.close();
         }
     };
 }

@@ -1,70 +1,84 @@
 import { Menu } from './Menu';
 
 export class MenuItem {
-    private isActive = false;
-    private isSubOpen = false;
+    private _isActive = false;
+    private _isSubOpen = false;
+    private _el: HTMLElement;
+    private _menu: Menu;
+    private _subMenu?: Menu;
 
-    constructor(
-        public el: HTMLElement,
-        public menu: Menu,
-        public subMenu?: Menu,
-    ) {
+    constructor(el: HTMLElement, menu: Menu, subMenu?: Menu) {
+        this._el = el;
+        this._menu = menu;
+        this._subMenu = subMenu;
         this.sync();
     }
 
-    public getIndex(): number {
-        return this.menu.getIndex(this);
+    get el() {
+        return this._el;
+    }
+
+    get menu() {
+        return this._menu;
+    }
+
+    get subMenu() {
+        return this._subMenu;
+    }
+
+    get index(): number {
+        return this._menu.getIndex(this);
     }
 
     setActive(value: boolean, subMenu?: boolean) {
-        if (this.isActive === value) return;
+        if (this._isActive === value) return;
 
-        this.isActive = value;
+        this._isActive = value;
 
-        if (subMenu && this.subMenu) {
-            this.isSubOpen = value;
+        if (subMenu && this._subMenu) {
+            this._isSubOpen = value;
         }
 
         this.sync();
     }
 
-    public focus() {
-        this.el.focus();
+    focus() {
+        this._el.focus();
     }
 
-    public openSub() {
-        if (!this.subMenu || this.isSubOpen) return;
-        this.isSubOpen = true;
+    openSub() {
+        if (!this._subMenu || this._isSubOpen) return;
+        this._isSubOpen = true;
         this.sync();
     }
 
-    public hasSubmenu(): boolean {
-        return !!this.subMenu;
+    hasSubmenu(): boolean {
+        return !!this._subMenu;
     }
 
-    public closeSub() {
-        if (!this.subMenu || !this.isSubOpen) return;
-        this.isSubOpen = false;
+    closeSub() {
+        if (!this._subMenu || !this._isSubOpen) return;
+        this._isSubOpen = false;
         this.sync();
     }
 
     private sync() {
-        this.el.tabIndex = this.isActive ? 0 : -1;
+        this._el.tabIndex = this._isActive ? 0 : -1;
 
-        if (this.isActive) {
-            this.el.dataset.active = '';
+        if (this._isActive) {
+            this._el.dataset.active = '';
         } else {
-            delete this.el.dataset.active;
-            this.el.blur();
+            delete this._el.dataset.active;
+            this._el.blur();
         }
 
-        if (this.subMenu) {
-            if (this.isSubOpen) {
-                this.subMenu.getEl().style.display = 'block';
+        if (this._subMenu) {
+            if (this._isSubOpen) {
+                this._subMenu.el.style.display = 'block';
             } else {
-                this.subMenu.getEl().style.display = 'none';
-                if (this.subMenu.hasSubmenus()) {
-                    this.subMenu.closeSubMenus();
+                this._subMenu.el.style.display = 'none';
+                if (this._subMenu.hasSubmenus()) {
+                    this._subMenu.closeSubMenus();
                 }
             }
         }

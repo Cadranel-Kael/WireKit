@@ -1,31 +1,29 @@
 import { Tab } from './Tab';
 
 export class TabList {
-    private tabs: Tab[] = [];
-    private selectedTab: Tab | null = null;
+    private _tabs: Tab[] = [];
+    private _selectedTab: Tab | null = null;
 
-    constructor(private el: HTMLElement) {
-        const tabs = this.el.querySelectorAll('[data-wire-tab]') as NodeListOf<HTMLElement>;
+    constructor(private _el: HTMLElement) {
+        const tabs = this._el.querySelectorAll('[data-wire-tab]') as NodeListOf<HTMLElement>;
         tabs.forEach((tab) => {
-            this.tabs.push(new Tab(this, tab.dataset.wireTab!));
+            this._tabs.push(new Tab(this, tab.dataset.wireTab!));
         });
-        this.show(
-            this.tabs.some((tab) => !tab.isDisabled()) ? this.tabs.find((tab) => !tab.isDisabled())! : this.tabs[0],
-        );
+        this.show(this._tabs.some((tab) => !tab.disabled) ? this._tabs.find((tab) => !tab.disabled)! : this._tabs[0]);
         this.attachListeners();
     }
 
     public attachListeners() {
-        this.el.addEventListener('keydown', (e: KeyboardEvent) => {
+        this._el.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 e.preventDefault();
-                const currentIndex = this.tabs.indexOf(this.selectedTab!);
+                const currentIndex = this._tabs.indexOf(this._selectedTab!);
                 const direction = e.key === 'ArrowRight' ? 1 : -1;
                 const nextTab = this.findNextEnabledTab(currentIndex, direction);
 
                 if (!nextTab) return;
 
-                const currentTrigger = this.selectedTab!.getTrigger();
+                const currentTrigger = this._selectedTab!.trigger;
                 const focusVisible = currentTrigger.matches(':focus-visible');
 
                 this.show(nextTab, focusVisible);
@@ -34,24 +32,24 @@ export class TabList {
     }
 
     private findNextEnabledTab(startIndex: number, direction: 1 | -1): Tab | null {
-        if (this.tabs.length === 0) return null;
+        if (this._tabs.length === 0) return null;
 
         let index = startIndex;
-        for (let i = 0; i < this.tabs.length; i++) {
-            index = (index + direction + this.tabs.length) % this.tabs.length;
-            const candidate = this.tabs[index];
-            if (!candidate.isDisabled()) return candidate;
+        for (let i = 0; i < this._tabs.length; i++) {
+            index = (index + direction + this._tabs.length) % this._tabs.length;
+            const candidate = this._tabs[index];
+            if (!candidate.disabled) return candidate;
         }
 
         return null;
     }
 
     public show(tab: Tab, focus = false) {
-        this.tabs.forEach((t) => {
-            const panel = t.getPanel();
-            const trigger = t.getTrigger();
+        this._tabs.forEach((t) => {
+            const panel = t.panel;
+            const trigger = t.trigger;
             if (t === tab) {
-                this.selectedTab = tab;
+                this._selectedTab = tab;
                 if (panel) {
                     panel.style.display = 'block';
                 }
