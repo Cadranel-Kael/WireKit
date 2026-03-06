@@ -15,8 +15,8 @@ export function initAccordions(root: ParentNode = document) {
 
     for (const [_, groupAccordions] of groups) {
         let exclusive = false;
-        if (groupAccordions[0].getGroupId) {
-            exclusive = document.getElementById(groupAccordions[0].getGroupId)?.dataset.wireExclusive === 'true';
+        if (groupAccordions[0].groupId) {
+            exclusive = document.getElementById(groupAccordions[0].groupId)?.dataset.wireExclusive === 'true';
         }
         new AccordionGroup(groupAccordions, exclusive);
     }

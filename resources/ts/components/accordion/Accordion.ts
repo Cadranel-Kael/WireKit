@@ -1,100 +1,106 @@
 export class Accordion {
-    private expanded: boolean;
-    private heading: HTMLElement;
-    private content: HTMLElement;
-    private listeners: Array<(a: Accordion) => void> = [];
-    private groupId: string | undefined;
-    private transition: boolean;
-    private height: number = 0;
-    private onTransitionEnd?: (e: TransitionEvent) => void;
+    private _isExpanded: boolean;
+    private _heading: HTMLElement;
+    private _content: HTMLElement;
+    private _listeners: Array<(a: Accordion) => void> = [];
+    private readonly _groupId: string | undefined;
+    private readonly _transition: boolean;
+    private _height: number = 0;
+    private _onTransitionEnd?: (e: TransitionEvent) => void;
+    private readonly _el: HTMLElement;
 
-    constructor(private el: HTMLElement) {
-        this.expanded = el.dataset.wireExpanded === 'true';
-        this.heading = el.querySelector('[data-wire-accordion-heading]') as HTMLElement;
-        this.content = el.querySelector('[data-wire-accordion-content]') as HTMLElement;
-        this.heading.addEventListener('click', () => this.toggle());
-        this.groupId = el.dataset.wireGroup;
+    constructor(el: HTMLElement) {
+        this._el = el;
+        this._isExpanded = el.dataset.wireExpanded === 'true';
+        this._heading = el.querySelector('[data-wire-accordion-heading]') as HTMLElement;
+        this._content = el.querySelector('[data-wire-accordion-content]') as HTMLElement;
+        this._heading.addEventListener('click', () => this.toggle());
+        this._groupId = el.dataset.wireGroup;
         const isReduced = window.matchMedia('(prefers-reduced-motion)').matches;
-        this.transition = el.dataset.wireTransition === 'true' && !isReduced;
+        this._transition = el.dataset.wireTransition === 'true' && !isReduced;
         this.sync();
     }
 
-    get getGroupId() {
-        return this.groupId;
+    get el() {
+        return this._el;
     }
 
-    collapse() {
+    get groupId() {
+        return this._groupId;
+    }
+
+    public collapse() {
         this.toggle(false);
     }
 
     get isExpanded() {
-        return this.expanded;
+        return this._isExpanded;
     }
 
-    toggle(force?: boolean) {
-        const next = force ?? !this.expanded;
-        if (next === this.expanded) return;
+    public toggle(force?: boolean) {
+        const next = force ?? !this._isExpanded;
+        if (next === this._isExpanded) return;
 
-        this.expanded = force ?? !this.expanded;
+        this._isExpanded = force ?? !this._isExpanded;
         this.sync();
-        this.listeners.forEach((l) => l(this));
+        this._listeners.forEach((l) => l(this));
     }
 
-    onChange(fn: (a: Accordion) => void) {
-        this.listeners.push(fn);
+    public onChange(fn: (a: Accordion) => void) {
+        this._listeners.push(fn);
     }
 
     private measure() {
-        this.content.style.display = 'block';
-        this.content.style.height = 'auto';
-        return this.content.scrollHeight;
+        this._content.style.display = 'block';
+        this._content.style.height = 'auto';
+        return this._content.scrollHeight;
     }
 
     private sync() {
-        if (this.onTransitionEnd) {
-            this.content.removeEventListener('transitionend', this.onTransitionEnd);
-            this.onTransitionEnd = undefined;
+        if (this._onTransitionEnd) {
+            this._content.removeEventListener('transitionend', this._onTransitionEnd);
+            this._onTransitionEnd = undefined;
         }
-        this.heading.ariaExpanded = String(this.expanded);
+        this._heading.ariaExpanded = String(this._isExpanded);
 
-        if (!this.transition) {
-            this.content.style.display = this.expanded ? 'block' : 'none';
+        if (!this._transition) {
+            this._content.style.display = this._isExpanded ? 'block' : 'none';
             return;
         }
-        this.height = this.measure();
-        if (this.expanded) {
-            this.content.style.display = 'block';
-            this.content.style.overflow = 'hidden';
-            this.content.style.height = '0px';
-            this.content.style.transition = 'height 300ms';
+        this._height = this.measure();
+        if (this._isExpanded) {
+            this._content.style.display = 'block';
+            this._content.style.overflow = 'hidden';
+            this._content.style.height = '0px';
+            this._content.style.transition = 'height 300ms';
 
-            this.content.offsetHeight;
-            this.content.style.height = `${this.height}px`;
-            this.onTransitionEnd = (e: TransitionEvent) => {
-                if (e.propertyName !== 'height' || !this.expanded) return;
-                this.content.style.height = 'auto';
-                this.content.style.overflow = '';
-                this.content.style.transition = '';
-                this.content.removeEventListener('transitionend', this.onTransitionEnd!);
-                this.onTransitionEnd = undefined;
+            this._content.offsetHeight;
+            this._content.style.height = `${this._height}px`;
+            this._onTransitionEnd = (e: TransitionEvent) => {
+                if (e.propertyName !== 'height' || !this._isExpanded) return;
+                this._content.style.height = 'auto';
+                this._content.style.overflow = '';
+                this._content.style.transition = '';
+                this._content.removeEventListener('transitionend', this._onTransitionEnd!);
+                this._onTransitionEnd = undefined;
             };
-            this.content.addEventListener('transitionend', this.onTransitionEnd);
+            this._content.addEventListener('transitionend', this._onTransitionEnd);
         } else {
-            this.content.style.height = `${this.height}px`;
-            this.content.style.overflow = 'hidden';
-            this.content.style.transition = 'height 300ms';
+            this._content.style.height = `${this._height}px`;
+            this._content.style.overflow = 'hidden';
+            this._content.style.transition = 'height 300ms';
 
-            this.content.offsetHeight;
-            this.content.style.height = '0px';
-            this.onTransitionEnd = (e: TransitionEvent) => {
-                if (e.propertyName !== 'height' || this.expanded) return;
-                this.content.style.display = 'none';
-                this.content.style.overflow = '';
-                this.content.style.transition = '';
-                this.content.removeEventListener('transitionend', this.onTransitionEnd!);
-                this.onTransitionEnd = undefined;
+            this._content.offsetHeight;
+            this._content.style.height = '0px';
+            this._onTransitionEnd = (e: TransitionEvent) => {
+                if (e.propertyName !== 'height' || this._isExpanded) return;
+                this._content.style.display = 'none';
+                this._content.style.overflow = '';
+                this._content.style.transition = '';
+                this._content.removeEventListener('transitionend', this._onTransitionEnd!);
+                this._onTransitionEnd = undefined;
             };
-            this.content.addEventListener('transitionend', this.onTransitionEnd);
+            this._content.addEventListener('transitionend', this._onTransitionEnd);
         }
     }
 }
