@@ -5,8 +5,13 @@ import { initToggles } from './components/toggles/initToggles';
 import { initTooltips } from './components/tooltip/initTooltips';
 import { initModals } from './components/modal/initModals';
 import { initTabList } from './components/tab/initTabList';
+import { initInputs } from './components/input/initInputs';
 
-document.addEventListener('DOMContentLoaded', () => {
+declare global {
+    const Livewire: any;
+}
+
+document.addEventListener('livewire:init', () => {
     initToggles();
     initAccordions();
     initContext();
@@ -14,4 +19,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initDropdowns();
     initModals();
     initTabList();
+    initInputs();
 });
