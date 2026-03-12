@@ -1,6 +1,9 @@
 @import '../../../../../resources/css/app.css';
 
 @custom-variant data-active (&[data-state~="active"]);
+@custom-variant loading (&[loading]);
+@custom-variant open (&[open]);
+@custom-variant closing (&[closing]);
 
 @layer base {
     [data-wire-tooltip-content], [data-wire-expanded="false"] > [data-wire-accordion-content], [data-wire-menu], [data-wire-tabs] [data-wire-tab-panel]:not(:first-child) {
@@ -11,6 +14,93 @@
 @utility rounded-auto-* {
     --height: --value(--radius-*, [length]);
     border-radius: calc(var(--height) * var(--radius-factor, 0.15));
+}
+
+@theme {
+    --animate-slide-from-left: slide-from-left 0.3s ease-out forwards;
+    --animate-slide-to-left: slide-to-left 0.3s ease-in forwards;
+    --animate-slide-from-right: slide-from-right 0.3s ease-out forwards;
+    --animate-slide-to-right: slide-to-right 0.3s ease-in forwards;
+    --animate-slide-from-bottom: slide-from-bottom 0.3s ease-out forwards;
+    --animate-slide-to-bottom: slide-to-bottom 0.3s ease-in forwards;
+    --animate-pop-in: pop-in 0.2s ease-in forwards;
+    --animate-pop-out: pop-out 0.2s ease-out forwards;
+
+    @keyframes pop-in {
+        from {
+            opacity: 0;
+            transform: scale(95%);
+        }
+        to {
+            opacity: 1;
+            transform: scale(100%);
+        }
+    }
+
+    @keyframes pop-out {
+        from {
+            opacity: 1;
+            transform: scale(100%);
+        }
+        to {
+            opacity: 0;
+            transform: scale(95%);
+        }
+    }
+
+    @keyframes slide-from-left {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slide-to-left {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-100%);
+        }
+    }
+
+    @keyframes slide-from-right {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slide-to-right {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(100%);
+        }
+    }
+
+    @keyframes slide-from-bottom {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-to-bottom {
+        from {
+            transform: translateY(0);
+        }
+        to {
+            transform: translateY(100%);
+        }
+    }
 }
 
 body:has(> [data-wire-sidebar] + [data-wire-header]) {
@@ -32,40 +122,4 @@ html {
 
 html:has([data-wire-modal][open]) {
     overflow: hidden;
-}
-
-[data-wire-modal] {
-    opacity: 0;
-
-    &[data-wire-position="right"][open] {
-        transform: translateX(0);
-
-        @starting-style {
-            transform: translateX(100%);
-        }
-    }
-
-    &[data-wire-position="left"][open] {
-        transform: translateX(0);
-
-        @starting-style {
-            transform: translateX(-100%);
-        }
-    }
-
-    &[data-wire-position="bottom"][open] {
-        transform: translateY(0);
-
-        @starting-style {
-            transform: translateY(100%);
-        }
-    }
-
-    &[open] {
-        opacity: 1;
-
-        @starting-style {
-            opacity: 0;
-        }
-    }
 }
