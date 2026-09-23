@@ -1,3 +1,3 @@
-<thead {{ $attributes->class(['border-core-200 border-b']) }}>
+<thead {{ $attributes->class(['border-border border-b']) }}>
     {{ $slot }}
 </thead>

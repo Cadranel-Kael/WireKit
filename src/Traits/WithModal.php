@@ -2,8 +2,6 @@
 
 namespace WireKit\Traits;
 
-use Fruitcake\LaravelDebugbar\Facades\Debugbar;
-
 trait WithModal
 {
     public function modal(string $modal): ModalProxy
@@ -15,11 +13,9 @@ trait WithModal
 class ModalProxy
 {
     public function __construct(
-        private string              $name,
+        private string $name,
         private \Livewire\Component $component
-    )
-    {
-    }
+    ) {}
 
     public function open(): void
     {

@@ -2,10 +2,8 @@
 
 namespace WireKit\View\Components\Table;
 
-use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use Str;
 
 class Columns extends Component
 {

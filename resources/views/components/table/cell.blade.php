@@ -1,5 +1,7 @@
 <td
-    {{ $attributes->class(['overflow-clip py-3 text-ellipsis whitespace-nowrap not-first:ps-3 not-last:pe-3', $alignClass]) }}
+    {{ $attributes->class(['text-foreground dark:bg-foreground dark:text-background overflow-clip bg-white py-3 text-ellipsis not-first:ps-3 not-last:pe-3', $alignClass]) }}
 >
-    {{ $slot }}
+    <span @class(['flex', $alignClass])>
+        {{ $slot }}
+    </span>
 </td>

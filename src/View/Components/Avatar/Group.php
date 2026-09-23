@@ -6,13 +6,9 @@ use Illuminate\View\Component;
 
 class Group extends Component
 {
-
     public function __construct(
 
-    ) {
-
-    }
-
+    ) {}
 
     public function render()
     {

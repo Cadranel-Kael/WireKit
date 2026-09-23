@@ -8,9 +8,7 @@ class Search extends Component
 {
     public function __construct(
         public string $placeholder = 'Search',
-    )
-    {
-    }
+    ) {}
 
     public function render()
     {

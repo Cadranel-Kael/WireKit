@@ -24,11 +24,7 @@ class WireKitTagCompiler extends ComponentTagCompiler
                         \s+
                         (?:
                             (?:
-                                @(?:class)(\( (?: (?>[^()]+) | (?-1) )* \))
-                            )
-                            |
-                            (?:
-                                @(?:style)(\( (?: (?>[^()]+) | (?-1) )* \))
+                                @(?:class|style|checked|selected|disabled|readonly|required)\s*(\( (?: (?>[^()]+) | (?-1) )* \))
                             )
                             |
                             (?:
@@ -63,11 +59,12 @@ class WireKitTagCompiler extends ComponentTagCompiler
         return preg_replace_callback($pattern, function (array $matches) {
             $this->boundAttributes = [];
 
-            $attributes = $this->getAttributesFromAttributeString($matches['attributes']);
+            $attributes = $this->getAttributesFromAttributeString(
+                $this->preProcessBooleanDirectives($matches['attributes'])
+            );
 
-            // Map "button" → "button.index"
             $component = $matches[1];
-            if (! str_contains($component, '.')) {
+            if (!str_contains($component, '.')) {
                 $component .= '.index';
             }
 
@@ -94,11 +91,7 @@ class WireKitTagCompiler extends ComponentTagCompiler
                         \s+
                         (?:
                             (?:
-                                @(?:class)(\( (?: (?>[^()]+) | (?-1) )* \))
-                            )
-                            |
-                            (?:
-                                @(?:style)(\( (?: (?>[^()]+) | (?-1) )* \))
+                                @(?:class|style|checked|selected|disabled|readonly|required)\s*(\( (?: (?>[^()]+) | (?-1) )* \))
                             )
                             |
                             (?:
@@ -132,15 +125,32 @@ class WireKitTagCompiler extends ComponentTagCompiler
         return preg_replace_callback($pattern, function (array $matches) {
             $this->boundAttributes = [];
 
-            $attributes = $this->getAttributesFromAttributeString($matches['attributes']);
+            $attributes = $this->getAttributesFromAttributeString(
+                $this->preProcessBooleanDirectives($matches['attributes'])
+            );
 
             $component = $matches[1];
-            if (! str_contains($component, '.')) {
+            if (!str_contains($component, '.')) {
                 $component .= '.index';
             }
 
-            return $this->componentString("wire::$component", $attributes)."\n@endComponentClass##END-COMPONENT-CLASS##";
+            return $this->componentString("wire::$component", $attributes) . "\n@endComponentClass##END-COMPONENT-CLASS##";
         }, $value);
+    }
+
+    /**
+     * Process boolean blade directives before compilation
+     *
+     * @param string $attributeString
+     * @return string
+     */
+    protected function preProcessBooleanDirectives(string $attributeString): string
+    {
+        return preg_replace(
+            '/@(checked|selected|disabled|readonly|required)\s*\(([^)]+)\)/',
+            ':$1="$2"',
+            $attributeString
+        );
     }
 
     /**

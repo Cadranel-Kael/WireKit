@@ -37,6 +37,10 @@ export class Accordion {
         return this._groupId;
     }
 
+    open() {
+        this.toggle(true);
+    }
+
     collapse() {
         this.toggle(false);
     }
@@ -111,4 +115,6 @@ export class Accordion {
             this._content.addEventListener('transitionend', this._onTransitionEnd);
         }
     }
+
+    destroy() {}
 }
