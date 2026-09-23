@@ -5,13 +5,48 @@
         "url": "https://github.com/Cadranel-Kael/WireKit"
     },
     "type": "module",
-    "devDependencies": {
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite build --watch"
+    },
+    "dependencies": {
+        "@floating-ui/dom": "^1.7.6",
         "@tailwindcss/typography": "^0.5.19",
+        "@tiptap/core": "3.26.0",
+        "@tiptap/extension-blockquote": "3.26.0",
+        "@tiptap/extension-bold": "3.26.0",
+        "@tiptap/extension-code": "3.26.0",
+        "@tiptap/extension-code-block": "3.26.0",
+        "@tiptap/extension-document": "3.26.0",
+        "@tiptap/extension-hard-break": "3.26.0",
+        "@tiptap/extension-heading": "3.26.0",
+        "@tiptap/extension-highlight": "3.26.0",
+        "@tiptap/extension-horizontal-rule": "3.26.0",
+        "@tiptap/extension-italic": "3.26.0",
+        "@tiptap/extension-link": "3.26.0",
+        "@tiptap/extension-list": "3.26.0",
+        "@tiptap/extension-paragraph": "3.26.0",
+        "@tiptap/extension-strike": "3.26.0",
+        "@tiptap/extension-subscript": "3.26.0",
+        "@tiptap/extension-superscript": "3.26.0",
+        "@tiptap/extension-text": "3.26.0",
+        "@tiptap/extension-text-align": "3.26.0",
+        "@tiptap/extension-underline": "3.26.0",
+        "@tiptap/extensions": "3.26.0",
+        "sortablejs": "^1.15.7"
+    },
+    "devDependencies": {
+        "@alpinejs/anchor": "^3.14.9",
+        "@alpinejs/collapse": "^3.14.9",
+        "@alpinejs/focus": "^3.14.9",
+        "@alpinejs/intersect": "^3.14.9",
+        "@ryangjchandler/alpine-clipboard": "^2.3.0",
+        "@ryangjchandler/alpine-tooltip": "^2.0.1",
         "@tailwindcss/vite": "^4.1.6",
-        "@tiptap/core": "^3.26.0",
-        "@tiptap/starter-kit": "^3.26.0",
+        "@tiptap/starter-kit": "3.26.0",
         "@types/node": "^25.5.0",
         "@types/sortablejs": "^1.15.9",
+        "alpinejs": "^3.14.9",
         "axios": "^1.9.0",
         "concurrently": "^9.1.2",
         "happy-dom": "*",
@@ -23,29 +58,8 @@
         "prettier-plugin-tailwindcss": "^0.6.11",
         "shiki": "^3.6.0",
         "tailwindcss": "^4.1.6",
+        "tippy.js": "^6.3.7",
         "vite": "^6.3.5",
         "vitest": "^4.1.2"
-    },
-    "scripts": {
-        "build": "vite build",
-        "dev": "vite build --watch"
-    },
-    "dependencies": {
-        "@alpinejs/anchor": "^3.14.9",
-        "@alpinejs/collapse": "^3.14.9",
-        "@alpinejs/focus": "^3.14.9",
-        "@alpinejs/intersect": "^3.14.9",
-        "@floating-ui/dom": "^1.7.6",
-        "@ryangjchandler/alpine-clipboard": "^2.3.0",
-        "@ryangjchandler/alpine-tooltip": "^2.0.1",
-        "@tiptap/extension-blockquote": "^3.26.0",
-        "@tiptap/extension-highlight": "^3.26.0",
-        "@tiptap/extension-subscript": "^3.26.0",
-        "@tiptap/extension-superscript": "^3.26.0",
-        "@tiptap/extension-text-align": "^3.26.0",
-        "@tiptap/extensions": "^3.26.0",
-        "alpinejs": "^3.14.9",
-        "sortablejs": "^1.15.7",
-        "tippy.js": "^6.3.7"
     }
 }
