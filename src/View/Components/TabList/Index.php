@@ -9,9 +9,7 @@ class Index extends Component
 {
     public function __construct(
         public string $variant = '',
-    )
-    {
-    }
+    ) {}
 
     public function getVariantClasses()
     {

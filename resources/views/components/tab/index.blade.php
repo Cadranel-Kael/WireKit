@@ -1,24 +1,18 @@
-@aware(['variant'])
+@aware(['groupId'])
 <button
     type="button"
     data-wire-tab="{{ $name }}"
     role="tab"
-    aria-controls="{{ $panelId }}"
-    id="{{ $id }}"
+    aria-controls="panel-{{ $name }}-{{ $groupId }}"
+    id="tab-{{ $name }}-{{ $groupId }}"
     {{
         $attributes->class([
-            'rounded-auto-sm data-active:text-foreground data-active:bg-background text-muted-foreground not-disabled:hover:text-foreground focus-visible:ring-ring inline-flex flex-1 items-center gap-1 px-4 py-1 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50',
-            'relative data-active:after:content-[""] data-active:after:h-0.5 data-active:after:absolute data-active:after:inset-x-0 data-active:after:-bottom-1 data-active:after:bg-foreground' => $variant === 'line',
+            'text-muted-foreground hover:text-foreground active:bg-background active:text-foreground outline-none focus-visible:focus-ring rounded-md px-2 py-1 text-sm transition-colors active:shadow-xs',
         ])
     }}
 >
     @if ($icon)
-        <wire:icon
-            :name="$icon"
-            :size="$attributes->get('icon:size', '4')"
-            :variant="$attributes->get('icon:variant', 'solid')"
-            @class(['shrink-0', $attributes->get('icon:class', '')])
-        />
+        <wire:icon name="{{ $icon }}" class="{{ $attributes->whereStartsWith('icon:class') }}" />
     @endif
 
     {{ $slot }}

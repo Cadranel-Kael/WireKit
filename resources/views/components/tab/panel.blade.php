@@ -1,3 +1,10 @@
-<div data-wire-tab-panel role="tabpanel" id="{{ $id }}" aria-labelledby="{{ $tabId }}" {{ $attributes }}>
+@aware(['groupId'])
+<div
+    data-wire-tab-panel
+    role="tabpanel"
+    id="panel-{{ $name }}-{{ $groupId }}"
+    aria-labelledby="tab-{{ $name }}-{{ $groupId }}"
+    {{ $attributes }}
+>
     {{ $slot }}
 </div>

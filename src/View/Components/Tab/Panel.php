@@ -7,15 +7,10 @@ use Illuminate\View\View;
 
 class Panel extends Component
 {
-    public string $id;
-    public string $tabId;
-
     public function __construct(
         public string $name = '',
     )
     {
-        $this->id = 'panel-' . $this->name;
-        $this->tabId = 'tab-' . $this->name;
     }
 
     public function render(): View
