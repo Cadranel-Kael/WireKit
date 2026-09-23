@@ -178,10 +178,10 @@ export class Menu {
     -------------------------- */
 
     private initializeItems() {
-        const elements = Array.from(this._el.querySelectorAll<HTMLElement>(':scope > [data-wire-menu-item]'));
+        const elements = Array.from(this._el.querySelectorAll<HTMLElement>(':scope > ul > li > [data-wire-menu-item]'));
 
         this._items = elements.map((el) => {
-            const subEl = el.querySelector<HTMLElement>('[data-wire-menu]');
+            const subEl = el.parentElement?.querySelector<HTMLElement>('[data-wire-menu]');
             const subMenu = subEl ? new Menu(subEl, undefined, this._manager) : undefined;
             const item = new MenuItem(el, this, subMenu);
 

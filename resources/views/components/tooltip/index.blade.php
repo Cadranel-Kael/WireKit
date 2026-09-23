@@ -1,20 +1,11 @@
-<div class="relative inline-block" data-wire-tooltip @if($delay) data-wire-delay="{{ $delay }}" @endif>
+<div data-wire-tooltip data-wire-offset="{{ $offset }}" data-wire-placement="{{ $placement }}">
+    <span data-wire-tooltip-trigger aria-describedby="{{ $id }}">{{ $slot }}</span>
     <div
-        @class(['absolute z-10', $getPlacementClass, $attributes->get('content-container:class')])
         data-wire-tooltip-content
+        id="{{ $id }}"
+        class="bg-foreground/80 text-background absolute top-0 left-0 w-max rounded-lg p-1 text-xs"
+        role="tooltip"
     >
-        <div
-            {{ $attributes->class(['rounded-radius bg-foreground text-background relative px-3 py-1.5 text-xs whitespace-nowrap shadow-lg']) }}
-            role="tooltip"
-            id="{{ $tooltip }}"
-        >
-            {{ $content }}
-            @if (! $arrowless)
-                <div
-                    @class(['text-foreground absolute border-5 border-transparent', $getArrowPlacementClass, $attributes->get('arrow:class')])
-                ></div>
-            @endif
-        </div>
+        {{ $content }}
     </div>
-    {{ $slot }}
 </div>

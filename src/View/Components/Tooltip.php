@@ -8,6 +8,7 @@ use Illuminate\View\View;
 class Tooltip extends Component
 {
     public string $id;
+
     public function __construct(
         public string $label = '',
         public string $content = '',

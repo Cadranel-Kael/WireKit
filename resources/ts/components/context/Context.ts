@@ -69,17 +69,23 @@ export class Context implements MenuController {
     }
 
     destroy(): void {
-        throw new Error('Method not implemented.');
+        this.el.removeEventListener('contextmenu', this.handleContextMenu);
+        this.el.removeEventListener('click', this.handleClick);
+        this._manager.unregisterController(this);
+        this._manager.unregisterMenu(this._menu);
     }
 
-    private attachEventListeners() {
-        this.el.addEventListener('contextmenu', (e) => {
-            this.open(e);
-        });
+    private handleContextMenu = (e: PointerEvent) => {
+        this.open(e);
+    };
 
-        this.el.addEventListener('click', () => {
-            this.close();
-        });
+    private handleClick = () => {
+        this.close();
+    };
+
+    private attachEventListeners() {
+        this.el.addEventListener('contextmenu', this.handleContextMenu);
+        this.el.addEventListener('click', this.handleClick);
     }
 
     private positionMenu(x: number, y: number) {

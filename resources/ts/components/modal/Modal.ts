@@ -12,7 +12,6 @@ export class Modal {
         this.attachTargetListeners();
         this._modalAttrObserver.observe(this._el, { attributes: true });
         this._modalRemoveObserver.observe(document.body, { attributes: false, subtree: false, childList: true });
-        this._el.removeAttribute('loading');
     }
 
     private _modalAttrObserver = new MutationObserver((mutations, observer) => {

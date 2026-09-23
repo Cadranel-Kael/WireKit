@@ -66,9 +66,9 @@ export class MenuItem {
         this._el.tabIndex = this._isActive ? 0 : -1;
 
         if (this._isActive) {
-            this._el.dataset.active = '';
+            this._el.dataset.state = 'active';
         } else {
-            delete this._el.dataset.active;
+            delete this._el.dataset.state;
             this._el.blur();
         }
 

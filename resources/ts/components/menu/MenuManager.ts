@@ -124,7 +124,7 @@ export class MenuManager {
     private attachGlobalListeners() {
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('mouseover', this.handleMouseOver);
-        document.addEventListener('click', this.handleClickAway.bind(this));
+        document.addEventListener('click', this.handleClickAway);
     }
 
     /**
@@ -178,12 +178,12 @@ export class MenuManager {
      * @param e
      * @private
      */
-    private handleClickAway(e: MouseEvent) {
+    private handleClickAway = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         if (Array.from(this._controllers.keys()).some((controller) => controller.containsElement(target))) return;
 
         this.closeAllControllers();
-    }
+    };
 
     /**
      * Closes all open menu controllers.
@@ -235,6 +235,6 @@ export class MenuManager {
     destroy() {
         document.removeEventListener('keydown', this.handleKeyDown);
         document.removeEventListener('mouseover', this.handleMouseOver);
-        document.removeEventListener('click', this.handleClickAway.bind(this));
+        document.removeEventListener('click', this.handleClickAway);
     }
 }

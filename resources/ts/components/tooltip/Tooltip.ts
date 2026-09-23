@@ -1,101 +1,50 @@
+import { computePosition, Placement, flip, shift, offset, OffsetOptions } from '@floating-ui/dom';
+
 export class Tooltip {
     private _trigger: HTMLElement | null;
-    private _content: HTMLElement | null;
-    private _isVisible: boolean = false;
-    private _isFocused: boolean = false;
-    private _hasDelay: boolean = false;
-    private _delay?: number;
-    private _timeout?: number;
-    private _boundKeyDownHandler: (e: KeyboardEvent) => void;
+    private _tooltip: HTMLElement | null;
+    private _placement: Placement | undefined;
+    private _offset: OffsetOptions = 0;
 
     constructor(private _el: HTMLElement) {
-        this._content = _el.querySelector('[data-wire-tooltip-content]');
-        this._trigger = _el.querySelector('[data-wire-tooltip-trigger]');
-        this._hasDelay = _el.hasAttribute('data-wire-delay');
-        if (this._hasDelay) {
-            this._delay = Number(_el.dataset.wireDelay);
-            if (!this._delay || this._delay === 1) {
-                this._delay = 300;
-            }
-        }
+        this._trigger = _el.querySelector<HTMLElement>('[data-wire-tooltip-trigger]');
+        this._tooltip = _el.querySelector<HTMLElement>('[data-wire-tooltip-content]');
 
-        this._boundKeyDownHandler = this.onKeyDown.bind(this);
-        this.attachEventListeners();
-        this.sync();
+        if (!this._tooltip || !this._trigger) return;
+
+        this._placement = _el.dataset.wirePlacement as Placement;
+        this._offset = Number(_el.dataset.wireOffset ?? 0);
+
+        this._update();
+
+        [
+            ['mouseenter', this._showTooltip] as const,
+            ['mouseleave', this._hideTooltip] as const,
+            ['focus', this._showTooltip] as const,
+            ['blur', this._hideTooltip] as const,
+        ].forEach(([event, listener]) => {
+            this._trigger!.addEventListener(event, listener);
+        });
     }
 
-    private attachEventListeners() {
-        if (!this._content || !this._trigger) return;
-        this._trigger.addEventListener('mouseenter', this.onMouseEnter.bind(this));
-        this._content.addEventListener('mouseenter', this.onMouseEnter.bind(this));
-        this._trigger.addEventListener('focus', this.onFocus.bind(this));
-        this._trigger.addEventListener('mouseleave', this.onMouseLeave.bind(this));
-        this._content.addEventListener('mouseleave', this.onMouseLeave.bind(this));
-        this._trigger.addEventListener('blur', this.onBlur.bind(this));
-        document.addEventListener('keydown', this._boundKeyDownHandler);
+    private _update() {
+        computePosition(this._trigger!, this._tooltip!, {
+            placement: this._placement,
+            middleware: [offset(this._offset), flip(), shift()],
+        }).then(({ x, y }) => {
+            Object.assign(this._tooltip!.style, {
+                left: `${x}px`,
+                top: `${y}px`,
+            });
+        });
     }
 
-    private toggle(force?: boolean) {
-        this._isVisible = force ?? !this._isVisible;
-        this.sync();
-    }
+    private _showTooltip = () => {
+        this._tooltip!.style.display = 'block';
+        this._update();
+    };
 
-    private show() {
-        this.toggle(true);
-    }
-
-    private hide() {
-        this.toggle(false);
-    }
-
-    private onBlur() {
-        this.hide();
-    }
-
-    private onFocus() {
-        this.show();
-    }
-
-    private onKeyDown(e: KeyboardEvent) {
-        if (this._isVisible && e.key === 'Escape') {
-            this.hide();
-        }
-    }
-
-    private onMouseEnter() {
-        if (this._delay) {
-            this._timeout = window.setTimeout(() => {
-                this.show();
-            }, this._delay);
-            return;
-        }
-        this.show();
-    }
-
-    private onMouseLeave() {
-        this.clearTimeout();
-        if (this._isFocused) return;
-        this.toggle(false);
-    }
-
-    private clearTimeout() {
-        if (this._timeout) {
-            window.clearTimeout(this._timeout);
-            this._timeout = undefined;
-        }
-    }
-
-    private sync() {
-        if (!this._content) return;
-        this._isFocused = document.activeElement === this._trigger;
-        if (!this._isVisible) {
-            this._content.style.display = 'none';
-        } else {
-            this._content.style.display = 'block';
-        }
-    }
-
-    public destroy() {
-        document.removeEventListener('keydown', this._boundKeyDownHandler);
-    }
+    private _hideTooltip = () => {
+        this._tooltip!.style.display = '';
+    };
 }

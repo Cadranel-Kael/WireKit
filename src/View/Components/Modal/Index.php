@@ -8,15 +8,16 @@ class Index extends Component
 {
     public function __construct(
         public string $name = '',
-        public bool   $drawer = false,
+        public bool $drawer = false,
         public string $position = 'right',
-    )
-    {
-    }
+    ) {}
 
-    public function getPositionClasses(): null|string
+    public function getPositionClasses(): ?string
     {
-        if (!$this->drawer) return null;
+        if (! $this->drawer) {
+            return null;
+        }
+
         return match ($this->position) {
             'right' => 'ml-auto min-h-screen max-w-md closing:animate-slide-to-right open:animate-slide-from-right',
             'left' => 'mr-auto min-h-screen max-w-md closing:animate-slide-to-left open:animate-slide-from-left',
