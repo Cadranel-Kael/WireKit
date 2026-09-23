@@ -1,0 +1,3 @@
+<fieldset {{ $attributes }}>
+    {{ $slot }}
+</fieldset>
