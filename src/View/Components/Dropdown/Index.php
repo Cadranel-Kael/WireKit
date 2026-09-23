@@ -7,15 +7,11 @@ use Illuminate\View\View;
 
 class Index extends Component
 {
-    public string $triggerId;
+    public string $dropdownId;
 
-    public string $menuId;
-
-    public function __construct(
-    )
+    public function __construct()
     {
-        $this->triggerId = uniqid('trigger-');
-        $this->menuId = uniqid('menu-');
+        $this->dropdownId = uniqid();
     }
 
     public function render(): View
