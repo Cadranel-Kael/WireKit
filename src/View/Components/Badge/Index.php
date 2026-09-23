@@ -34,7 +34,7 @@ class Index extends Component
     {
         return match ($this->size) {
             'sm' => match ($this->variant) {
-                'pill' => 'text-xs py-1 px-2',
+                'pill' => 'text-xs py-1 px-4',
                 default => 'text-xs py-1 px-2',
             },
             'l' => match ($this->variant) {
