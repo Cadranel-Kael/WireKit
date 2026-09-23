@@ -20,6 +20,18 @@ describe('Badge\Index', function () {
             expect($badge->iconRight)->toBe('');
             expect($badge->as)->toBe('');
         });
+
+        it('is not a dot by default', function () {
+            expect((new Index())->dot)->toBeFalse();
+        });
+    });
+
+    describe('dotColorClass', function () {
+        it('is always the solid variant of the color, regardless of colorVariant', function () {
+            $badge = new Index(color: 'success', colorVariant: 'border', dot: true);
+
+            expect($badge->dotColorClass)->toBe('text-success-foreground bg-success');
+        });
     });
 
     describe('variantClass()', function () {

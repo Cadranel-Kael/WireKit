@@ -1,4 +1,6 @@
-@if ($as === 'button')
+@if ($dot)
+    <div {{ $attributes->class(['h-2 w-2 rounded-full', $dotColorClass]) }}></div>
+@elseif ($as === 'button')
     <button
         {{
             $attributes

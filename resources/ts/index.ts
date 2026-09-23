@@ -12,6 +12,7 @@ import initToasts from './components/toast/initToasts'
 import WireToast from './components/toast/WireToast'
 import { initTrees } from './components/tree/initTrees'
 import { initResizables } from './components/resizable/initResizables'
+import { initInlineEdit } from './components/inline-edit/initInlineEdit'
 import WireOtp from './components/otp/WireOtp'
 
 declare global {
@@ -42,5 +43,22 @@ document.addEventListener('livewire:navigated', () => {
     initToasts()
     initTrees()
     initResizables()
+    initInlineEdit()
     removeLoading()
+})
+
+// Most components above only need `livewire:navigated` -- their
+// interactivity is native (popover, <dialog>) and keeps working
+// regardless of which DOM node currently carries their markup, so a
+// plain Livewire AJAX morph (wire:click, etc.) that adds a matching
+// element mid-session doesn't need any JS to run again. InlineEdit isn't
+// declarative like that: it needs its own constructor to run on whatever
+// element currently has the data-wire-inline-edit attribute, including
+// one that first appears well after initial load (e.g. a conditional
+// `@if/@else` block toggling a whole subtree in and out). `morph.added`
+// fires for exactly that case.
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.added', ({ el }: { el: HTMLElement }) => {
+        initInlineEdit(el)
+    })
 })

@@ -9,6 +9,8 @@ class Index extends Component
 {
     public string $colorClass;
 
+    public string $dotColorClass;
+
     public function __construct(
         public string $color = 'core',
         public string $colorVariant = '',
@@ -17,9 +19,14 @@ class Index extends Component
         public string $icon = '',
         public string $iconRight = '',
         public string $as = '',
+        public bool $dot = false,
     )
     {
         $this->colorClass = getColorClass($this->color, $this->colorVariant, $this->as);
+        // A status dot is always a solid fill, regardless of $colorVariant
+        // -- the "soft" tint that suits a padded pill reads as barely-there
+        // at a 0.5rem circle.
+        $this->dotColorClass = getColorClass($this->color, 'solid');
     }
 
     public function variantClass(): string

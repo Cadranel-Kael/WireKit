@@ -124,10 +124,24 @@ if (!function_exists('getColorClass')) {
                 'border' => 'text-core-800 bg-white border border-gray-800',
                 default => 'text-core-800 bg-white',
             },
+            // Anything not matched above isn't a numbered Tailwind palette
+            // (red-50..950, etc.) -- it's a flat/semantic token a consuming
+            // app defined itself (e.g. this package's own `success`/`danger`
+            // theme tokens, each a single CSS variable, not a 50-950 scale).
+            // Guessing a `-500`/`-800` suffix for those would emit a class
+            // that never exists in the app's CSS, so fall back to
+            // opacity-modified single-shade classes instead. `solid` uses
+            // `{color}-foreground` for its text rather than a hardcoded
+            // white, matching this package's own theme convention of
+            // pairing every semantic color with a `-foreground` companion
+            // (`--color-success-foreground`, `--color-danger-foreground`,
+            // etc.) -- if a consuming app defines a color without a
+            // foreground companion, the class is simply a no-op rather than
+            // risking invisible white-on-white text.
             default => match ($variant) {
-                'solid' => "text-white bg-{$color}-500" . ($context === 'button' ? " hover:bg-{$color}-400" : ''),
-                'border' => "text-{$color}-800 bg-{$color}-200 border border-{$color}-800" . ($context === 'button' ? " hover:bg-{$color}-300" : ''),
-                default => "text-{$color}-800 bg-{$color}-200" . ($context === 'button' ? " hover:bg-{$color}-300" : ''),
+                'solid' => "text-{$color}-foreground bg-{$color}" . ($context === 'button' ? " hover:bg-{$color}/90" : ''),
+                'border' => "text-{$color} bg-{$color}/10 border border-{$color}" . ($context === 'button' ? " hover:bg-{$color}/20" : ''),
+                default => "text-{$color} bg-{$color}/10" . ($context === 'button' ? " hover:bg-{$color}/20" : ''),
             },
         };
     }
