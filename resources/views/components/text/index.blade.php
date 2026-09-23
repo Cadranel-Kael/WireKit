@@ -1,3 +1,3 @@
-<div data-wire-text {{ $attributes->class('text-core-500 text-sm dark:text-white') }}>
+<div data-wire-text {{ $attributes->class('text-muted-foreground text-sm') }}>
     {{ $slot }}
 </div>

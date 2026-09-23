@@ -12,6 +12,7 @@ class Item extends Component
         public string $separator = 'chevron-right',
         public string $icon = '',
         public string $iconVariant = 'outline',
+        public string $as = '',
     )
     {
     }

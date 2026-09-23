@@ -1,12 +1,64 @@
-@import '../../../../../resources/css/app.css';
+/*@import '../../../../../resources/css/app.css';*/
+@plugin "@tailwindcss/typography";
 
-@custom-variant data-active (&[data-state~="active"]);
-@custom-variant loading (&[loading]);
-@custom-variant open (&[open]);
-@custom-variant closing (&[closing]);
+@source "../ts/components/editor/initEditor.ts";
+
+@variant active (&[data-state~="active"]);
+@variant loading (&[loading]);
+@variant open (&[open]);
+@variant closing (&[closing]);
+@variant invalid (&[aria-invalid]);
+@variant dragging (&[data-state~="dragging"]);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@variant stack-first (:is([data-wire-stack] [data-wire-input-row]:first-of-type) &);
+@variant stack-last  (:is([data-wire-stack] [data-wire-input-row]:last-of-type) &);
+@variant stack-mid   (:is([data-wire-stack] [data-wire-input-row]:not(:first-of-type):not(:last-of-type)) &);
+
+@variant stack-group-first (:is([data-wire-input-group] > :first-child:not(:only-child)) &, &:is([data-wire-input-group] > :first-child:not(:only-child)));
+@variant stack-group-last  (:is([data-wire-input-group] > :last-child:not(:only-child)) &, &:is([data-wire-input-group] > :last-child:not(:only-child)));
+@variant stack-group-mid   (:is([data-wire-input-group] > :not(:first-child):not(:last-child)) &, &:is([data-wire-input-group] > :not(:first-child):not(:last-child)));
 
 @layer base {
-    [data-wire-tooltip-content], [data-wire-expanded="false"] > [data-wire-accordion-content], [data-wire-menu], [data-wire-tabs] [data-wire-tab-panel]:not(:first-child) {
+    [data-wire-tooltip-content],
+    [data-wire-expanded='false'] > [data-wire-accordion-content],
+    [data-wire-dropdown-panel],
+    [data-wire-tabs] [data-wire-tab-panel]:not(:first-child) {
+        display: none;
+    }
+
+    body:has(> [data-wire-sidebar] + [data-wire-header]) {
+        display: grid;
+        grid-template-areas:
+        'sidebar header header'
+        'sidebar main   aside '
+        'sidebar footer aside ';
+    }
+
+    body:has(> [data-wire-sidebar]) {
+        display: grid;
+        grid-auto-columns: auto 1fr;
+        grid-template-areas:
+        'sidebar main'
+        'sidebar footer';
+    }
+
+    body:has(> [data-wire-header]) {
+        display: grid;
+        grid-auto-rows: auto 1fr auto;
+        grid-auto-columns: min-content 1fr min-content;
+    }
+
+    html {
+        scrollbar-gutter: stable;
+    }
+
+    html:has([data-wire-modal][open]) {
+        overflow: hidden;
+    }
+
+    [data-wire-tree-item]:not(:has(> [data-wire-tree-group])) [data-wire-tree-toggle] {
         display: none;
     }
 }
@@ -16,15 +68,71 @@
     border-radius: calc(var(--height) * var(--radius-factor, 0.15));
 }
 
+/*
+ * A pure visual declaration, deliberately with no built-in trigger --
+ * pair it with `outline-none focus-visible:focus-ring` on the focusable
+ * element itself, or `peer-focus-visible:focus-ring` / `group-focus-visible:focus-ring`
+ * to draw the ring on a different element than the one that's actually focused
+ * (e.g. a switch's visible track when its visually-hidden input is focused).
+ */
+@utility focus-ring {
+    box-shadow: 0 0 0 var(--ring-width, 4px) color-mix(in oklab, var(--color-ring) var(--ring-opacity, 50%), transparent);
+}
+
 @theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-background: var(--color-white);
+
+    --color-foreground: var(--color-zinc-800);
+
+    --color-muted: var(--color-zinc-100);
+    --color-muted-foreground: var(--color-zinc-500);
+
+    --color-fill: var(--color-zinc-100);
+    --color-fill-active: var(--color-zinc-200);
+    --color-fill-foreground: var(--color-zinc-800);
+
+    --color-card: var(--color-white);
+    --color-card-foreground: var(--color-zinc-800);
+
+    --color-accent: var(--color-zinc-800);
+    --color-accent-foreground: var(--color-white);
+
+    --color-border: var(--color-zinc-200);
+
+    --color-input: var(--color-white);
+    --color-input-border: var(--color-zinc-200);
+
+    --radius-base: var(--radius-lg);
+
+    /*--text-base: var(--text-sm);*/
+    --color-success: var(--color-green-500);
+    --color-success-foreground: var(--color-white);
+
+    --color-danger: var(--color-red-500);
+    --color-danger-foreground: var(--color-white);
+
+    --color-warning: var(--color-amber-500);
+    --color-warning-foreground: var(--color-white);
+
+    --color-ring: var(--color-zinc-400);
+    --ring-width: 4px;
+    --ring-opacity: 50%;
+
+    --radius-factor: 2;
+
+    --color-primary: #007bff;
+    --color-primary-foreground: #88b2e0;
+
     --animate-slide-from-left: slide-from-left 0.3s ease-out forwards;
     --animate-slide-to-left: slide-to-left 0.3s ease-in forwards;
     --animate-slide-from-right: slide-from-right 0.3s ease-out forwards;
     --animate-slide-to-right: slide-to-right 0.3s ease-in forwards;
     --animate-slide-from-bottom: slide-from-bottom 0.3s ease-out forwards;
     --animate-slide-to-bottom: slide-to-bottom 0.3s ease-in forwards;
-    --animate-pop-in: pop-in 0.2s ease-in forwards;
+    --animate-pop-in: pop-in 0.3s ease-in forwards;
     --animate-pop-out: pop-out 0.2s ease-out forwards;
+    --animate-toast-appear: toast-appear 0.2s ease-out forwards;
 
     @keyframes pop-in {
         from {
@@ -101,25 +209,118 @@
             transform: translateY(100%);
         }
     }
+
+    @keyframes toast-progress {
+        to {
+            transform: scaleX(0);
+        }
+    }
+
+    @keyframes toast-appear {
+        from {
+            transform: translateY(50%) scale(95%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0) scale(100%);
+            opacity: 1;
+        }
+    }
 }
 
-body:has(> [data-wire-sidebar] + [data-wire-header]) {
-    grid-template-areas:
-        'sidebar header header'
-        'sidebar main   aside '
-        'sidebar footer aside ';
+@layer theme {
+    .dark {
+        --color-background: var(--color-zinc-800);
+        --color-foreground: var(--color-white);
+        --color-accent: var(--color-white);
+        --color-accent-foreground: var(--color-neutral-800);
+        --color-muted: var(--color-zinc-400);
+        --color-muted-foreground: var(--color-zinc-100);
+
+        --color-card: var(--color-zinc-700);
+        --color-card-foreground: var(--color-white);
+
+        --color-border: var(--color-zinc-600);
+    }
 }
 
-body:has(> [data-wire-header]) {
-    display: grid;
-    grid-auto-rows: auto 1fr auto;
-    grid-auto-columns: min-content 1fr min-content;
-}
+@layer components {
 
-html {
-    scrollbar-gutter: stable;
-}
 
-html:has([data-wire-modal][open]) {
-    overflow: hidden;
+    [data-wire-toast]:hover {
+        pointer-events: auto;
+
+        wire-toast {
+            &[data-wire-direction='top'] {
+                transform: translateY(calc(var(--toast-offset) * -1));
+            }
+
+            &[data-wire-direction='bottom'] {
+                transform: translateY(calc(var(--toast-offset)));
+            }
+
+            opacity: 1;
+
+            > *:after {
+                animation-play-state: paused;
+            }
+        }
+    }
+
+    wire-toast {
+        grid-area: 1 / 1;
+        pointer-events: auto;
+        z-index: calc(100 - var(--toast-index));
+        padding-bottom: 8px;
+
+        &[data-wire-direction='top'] {
+            transform: translateY(calc(var(--toast-offset) * -0.1)) scale(calc(1 - var(--toast-index, 0) * .03));
+        }
+
+        &[data-wire-direction='bottom'] {
+            transform: translateY(calc(var(--toast-offset) * 0.1)) scale(calc(1 - var(--toast-index, 0) * .03));
+        }
+
+        transition: transform .2s ease, opacity .2s ease;
+
+        &:nth-last-child(2) {
+            opacity: 0.95;
+        }
+
+        &:nth-last-child(3) {
+            opacity: 0.8;
+        }
+
+        &:nth-last-child(n + 4) {
+            opacity: 0;
+        }
+    }
+
+    wire-toast > *:after {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        bottom: 0;
+        height: 0.25rem;
+        width: 100%;
+        transform-origin: left;
+        animation: toast-progress var(--wire-toast-duration) linear forwards;
+    }
+
+    wire-toast[variant="success"] > *:after {
+        background-color: var(--color-success);
+    }
+
+    wire-toast[variant="danger"] > *:after {
+        background-color: var(--color-danger);
+    }
+
+    wire-toast[variant="warning"] > *:after {
+        background-color: var(--color-warning);
+    }
+
+    .sortable-fallback {
+        list-style: none;
+        @apply shadow-2xl;
+    }
 }

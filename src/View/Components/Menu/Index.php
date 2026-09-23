@@ -7,11 +7,10 @@ use Illuminate\View\View;
 
 class Index extends Component
 {
-    public string $id;
-
-    public function __construct()
+    public function __construct(
+        public string $id = '',
+    )
     {
-        $this->id = uniqid('menu-');
     }
 
     public function render(): View

@@ -1,9 +1,18 @@
+@aware(["dropdownId"])
 <div
-    role="menu"
     data-wire-menu
     tabindex="-1"
-    id="{{ $id }}"
-    {{ $attributes->class(['border-core-200 z-20 w-52 rounded-lg border bg-white p-2 text-sm shadow shadow-md focus:outline-none']) }}
+    @if ($dropdownId && ! $id)
+        id="menu-{{ $dropdownId }}"
+        anchor="trigger-{{ $dropdownId }}"
+        popover
+    @endif
+    @if ($id)
+        id="{{ $id }}"
+    @endif
+    {{ $attributes->class(["border-border bg-background outline-none focus-visible:focus-ring rounded-lg border p-2 text-sm shadow-sm [position-anchor:auto] [position-area:bottom_span-left]"]) }}
 >
-    {{ $slot }}
+    <ul role="menu">
+        {{ $slot }}
+    </ul>
 </div>

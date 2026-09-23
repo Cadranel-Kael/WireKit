@@ -5,13 +5,11 @@ namespace WireKit\View\Components\Button;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-class Index extends Component
+class Button extends Component
 {
     public string $colorClass = '';
 
     public function __construct(
-        public string  $as = 'button',
-        public string  $href = '',
         public ?string $label = '',
         public bool    $loading = false,
         public string  $variant = '',
@@ -20,7 +18,6 @@ class Index extends Component
         public bool    $square = false,
         public string  $color = '',
         public bool    $inset = false,
-        public string  $tooltip = '',
     )
     {
         if ($this->color) {
@@ -31,12 +28,12 @@ class Index extends Component
     public function variantClass()
     {
         return match ($this->variant) {
-            'primary' => 'bg-accent text-accent-foreground border border-accent hover:bg-accent/80 disabled:bg-accent/50 disabled:border-accent/50 focus-visible:ring-4 focus-visible:ring-accent/50 outline-none',
+            'primary' => 'bg-accent text-accent-foreground shadow-xs hover:bg-accent/90 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
             'filled' => 'bg-fill text-fill-foreground hover:bg-fill/60 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
             'danger' => 'bg-danger text-danger-foreground shadow-xs hover:bg-danger/90 focus-visible:ring-danger/50 focus-visible:ring-4 outline-none',
-            'ghost' => 'bg-none text-foreground hover:bg-muted',
+            'ghost' => 'bg-none text-core-900 hover:bg-fill dark:text-white dark:hover:bg-core-700 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
             'custom' => '',
-            default => 'bg-background text-foreground border border-border hover:bg-foreground/5 focus-visible:ring-4 focus-visible:ring-foreground/20 outline-none',
+            default => 'bg-white dark:bg-core-700 not-group-[.button-group]:border not-group-[.button-group]:border-core-200 dark:not-group-[.button-group]:border-core-600 text-core-900 dark:text-white shadow-xs hover:bg-core-50 dark:hover:bg-core-500 focus-visible:ring-ring/50 focus-visible:ring-4 outline-none',
         };
     }
 
@@ -51,6 +48,6 @@ class Index extends Component
 
     public function render(): View
     {
-        return view('wire-kit::components.button.index');
+        return view('wire-kit::components.button.button');
     }
 }

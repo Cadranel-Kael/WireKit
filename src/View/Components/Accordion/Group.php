@@ -12,8 +12,7 @@ class Group extends Component
     public function __construct(
         public bool $exclusive = false,
         public bool $transition = false,
-    )
-    {
+    ) {
         $this->groupId = uniqid('group-');
     }
 

@@ -7,7 +7,7 @@
             :name="$icon"
             :variant="$attributes->get('icon:variant', '')"
             :size="$attributes->get('icon:size', '')"
-            @class(['text-core-400', $attributes->get('icon:class', '')])
+            @class(['text-muted-foreground', $attributes->get('icon:class', '')])
         />
     @endif
 

@@ -5,6 +5,10 @@ namespace WireKit\View\Components\Accordion;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
+/*
+ * An accordion component
+ */
+
 class Index extends Component
 {
     public $id;
@@ -15,12 +19,13 @@ class Index extends Component
 
     public function __construct(
         public string $heading = '',
-        public bool $expanded = false,
-        public bool $disabled = false,
-    ) {
-        $this->id = 'accordion-item-'.uniqid();
-        $this->contentId = 'content-'.uniqid();
-        $this->headingId = 'heading-'.uniqid();
+        public bool   $expanded = false,
+        public bool   $disabled = false,
+    )
+    {
+        $this->id = 'accordion-item-' . uniqid();
+        $this->contentId = 'content-' . uniqid();
+        $this->headingId = 'heading-' . uniqid();
     }
 
     public function render(): View

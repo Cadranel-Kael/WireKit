@@ -3,7 +3,7 @@
     role="alert"
     {{
         $attributes->class([
-            'border-core-200 flex w-full max-w-md gap-4 rounded-xl border px-4 py-3 text-sm',
+            'border-border flex w-full max-w-md gap-4 rounded-xl border px-4 py-3 text-sm',
             'items-start' => ! $inline,
             'items-center' => $inline,
             $colorClass,
@@ -15,7 +15,7 @@
             :name="$icon"
             :variant="$attributes->get('icon:variant', '')"
             :size="$attributes->get('icon:size', '')"
-            @class(['text-core-400 mt-0.5 shrink-0', $attributes->get('icon:class', '')])
+            @class(['text-muted-foreground mt-0.5 shrink-0', $attributes->get('icon:class', '')])
         />
     @endif
 

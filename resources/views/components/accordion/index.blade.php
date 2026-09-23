@@ -4,7 +4,7 @@
     data-wire-expanded="@js($expanded)"
     data-disabled="@js($disabled)"
     data-wire-group="{{ $groupId }}"
-    data-wire-transition="@js($transition)";
+    data-wire-transition="@js($transition)"
     {{ $attributes->class('border-border flex max-w-sm flex-col pb-2 not-last:border-b') }}
 >
     @if ($heading)

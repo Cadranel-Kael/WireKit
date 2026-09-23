@@ -3,7 +3,7 @@
         {{
             $attributes
                 ->class([
-                    'flex w-fit items-center gap-1 font-medium',
+                    'flex w-fit items-center gap-1 font-medium outline-none focus-visible:focus-ring',
                     $colorClass,
                     $sizeClass(),
                     $variantClass(),
@@ -12,13 +12,21 @@
         }}
     >
         @if ($icon)
-            <x-icon :name="$icon" />
+            <wire:icon
+                :name="$icon"
+                :variant="$attributes->get('icon:variant', '')"
+                :size="$attributes->get('icon:size', '')"
+            />
         @endif
 
         {{ $slot }}
 
-        @if ($iconRight)
-            <x-icon :name="$iconRight" />
+        @if ($attributes->get('icon:right', ''))
+            <wire:icon
+                :name="$attributes->get('icon:right', '')"
+                :variant="$attributes->get('icon:variant', '')"
+                :size="$attributes->get('icon:size', '')"
+            />
         @endif
     </button>
 @else
@@ -33,13 +41,21 @@
         }}
     >
         @if ($icon)
-            <x-icon :name="$icon" />
+            <wire:icon
+                :name="$icon"
+                :variant="$attributes->get('icon:variant', '')"
+                :size="$attributes->get('icon:size', '')"
+            />
         @endif
 
         {{ $slot }}
 
-        @if ($iconRight)
-            <x-icon :name="$iconRight" />
+        @if ($attributes->get('icon:right', ''))
+            <wire:icon
+                :name="$attributes->get('icon:right', '')"
+                :variant="$attributes->get('icon:variant', '')"
+                :size="$attributes->get('icon:size', '')"
+            />
         @endif
     </div>
 @endif

@@ -7,12 +7,13 @@ use Illuminate\View\View;
 
 class Submenu extends Component
 {
-    public string $subId;
+    public string $id;
 
     public function __construct(
         public string $heading = '',
-    ) {
-        $this->subId = uniqid('menu-');
+    )
+    {
+        $this->id = uniqid();
     }
 
     public function render(): View

@@ -11,7 +11,10 @@ class Item extends Component
         public string $icon = '',
         public string $id = '',
         public string $shortcut = '',
-    ) {}
+        public string $href = '',
+    )
+    {
+    }
 
     public function render(): View
     {

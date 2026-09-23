@@ -1,6 +1,6 @@
 <?php
 
-namespace LivewireUIKit\View\Components\Layouts\Auth;
+namespace WireKit\View\Components\Layouts\Auth;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
