@@ -13,6 +13,7 @@ import WireToast from './components/toast/WireToast'
 import { initTrees } from './components/tree/initTrees'
 import { initResizables } from './components/resizable/initResizables'
 import { initInlineEdit } from './components/inline-edit/initInlineEdit'
+import { initSidebars } from './components/sidebar/initSidebars'
 import WireOtp from './components/otp/WireOtp'
 
 declare global {
@@ -44,6 +45,7 @@ document.addEventListener('livewire:navigated', () => {
     initTrees()
     initResizables()
     initInlineEdit()
+    initSidebars()
     removeLoading()
 })
 
