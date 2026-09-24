@@ -10,6 +10,18 @@ describe('Sidebar\Index', function () {
 
             expect($component->sticky)->toBeFalse();
         });
+
+        it('defaults the id to "sidebar"', function () {
+            $component = new Index();
+
+            expect($component->id)->toBe('sidebar');
+        });
+
+        it('is open by default', function () {
+            $component = new Index();
+
+            expect($component->open)->toBeTrue();
+        });
     });
 
     describe('props', function () {
@@ -17,6 +29,18 @@ describe('Sidebar\Index', function () {
             $component = new Index(sticky: true);
 
             expect($component->sticky)->toBeTrue();
+        });
+
+        it('accepts a custom id', function () {
+            $component = new Index(id: 'app-sidebar');
+
+            expect($component->id)->toBe('app-sidebar');
+        });
+
+        it('can start closed', function () {
+            $component = new Index(open: false);
+
+            expect($component->open)->toBeFalse();
         });
     });
 });
