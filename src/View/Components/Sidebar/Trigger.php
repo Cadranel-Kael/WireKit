@@ -11,12 +11,16 @@ use Illuminate\View\Component;
  * dedicated open button (e.g. in a collapsed rail) separate from a
  * dedicated close button (e.g. inside the sidebar itself).
  */
+
 class Trigger extends Component
 {
     public function __construct(
         public string $for = 'sidebar',
         public string $action = 'toggle',
-    ) {}
+        public string $icon = 'menu',
+    )
+    {
+    }
 
     public function render(): \Illuminate\View\View
     {
