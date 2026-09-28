@@ -1,6 +1,6 @@
 <div
     data-wire-avatar
-    {{ $attributes->class(['relative flex items-center justify-center overflow-clip text-sm shadow', $sizeClass, $colorClass, 'rounded' => ! $circle, 'rounded-full' => $circle]) }}
+    {{ $attributes->class(['relative flex items-center justify-center overflow-clip text-sm shadow-xs', $sizeClass, $colorClass, 'rounded' => ! $circle, 'rounded-full' => $circle]) }}
 >
     @if ($src)
         <img src="{{ $src }}" alt="{{ $name }}" />
