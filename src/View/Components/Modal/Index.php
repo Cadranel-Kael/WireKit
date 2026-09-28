@@ -8,13 +8,17 @@ class Index extends Component
 {
     public function __construct(
         public string $name = '',
-        public bool $drawer = false,
+        public bool   $drawer = false,
         public string $position = 'right',
-    ) {}
+        public string $variant = 'default',
+        public bool   $closable = true,
+    )
+    {
+    }
 
     public function getPositionClasses(): ?string
     {
-        if (! $this->drawer) {
+        if (!$this->drawer) {
             return null;
         }
 
