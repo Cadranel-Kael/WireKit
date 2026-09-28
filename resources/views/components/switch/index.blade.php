@@ -1,4 +1,10 @@
-<label class="inline-flex items-center gap-0.5">
+<label class="inline-flex w-full items-center justify-between">
+    @if ($label)
+        <span class="peer-invalid:text-danger peer-disabled:text-muted-foreground ml-2 text-sm font-medium">
+            {{ $label }}
+        </span>
+    @endif
+
     <input
         role="switch"
         type="checkbox"
@@ -9,9 +15,4 @@
     >
         <span class="bg-background absolute top-px left-px size-4 rounded-full shadow-2xs transition-transform"></span>
     </span>
-    @if ($label)
-        <span class="peer-invalid:text-danger peer-disabled:text-muted-foreground ml-2 text-sm font-medium">
-            {{ $label }}
-        </span>
-    @endif
 </label>
