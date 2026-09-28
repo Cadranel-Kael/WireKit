@@ -1,5 +1,5 @@
 <div
-    {{ $attributes->class(["w-full max-w-sm", "border-border bg-muted/40 block rounded-xl border " => $variant === "card"]) }}
+    {{ $attributes->class(["w-full max-w-sm", "border-border bg-muted/40 block rounded-xl border" => $variant === "card"]) }}
     @if ($collapsible)
         x-data="{ open: @js($expanded) }"
     @endif
