@@ -1,6 +1,10 @@
 @aware(["labelId", "descriptionId", "isInGroup" => false])
-@php($labelId = $labelId ?: uniqid("label-"))
-@php($descriptionId = $descriptionId ?: uniqid("description-"))
+@php
+    $fieldKey = (string) ($attributes->wire("model")->value() ?: $attributes->get("name") ?: $attributes->get("id"));
+@endphp
+
+@php($labelId = $labelId ?: "label-" . md5($fieldKey . "-label"))
+@php($descriptionId = $descriptionId ?: "description-" . md5($fieldKey . "-description"))
 
 @if ($label || $description)
     <wire:field :$labelId :$descriptionId class="group">
@@ -34,7 +38,7 @@
         >
             @if ($icon)
                 <div class="text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <wire:icon :name="$icon" size="4" />
+                    <wire:icon class="size-4" :name="$icon" size="4" />
                 </div>
             @endif
 
@@ -50,7 +54,7 @@
                     @isset($iconAfter)
                         {{ $iconAfter }}
                     @else
-                        <wire:icon class="pointer-events-none" :name="$attributes->get('icon:after')" size="4" />
+                        <wire:icon class="pointer-events-none size-4" :name="$attributes->get('icon:after')" size="4" />
                     @endisset
                 </div>
             @endif
@@ -77,7 +81,7 @@
     >
         @if ($icon)
             <div class="text-muted-foreground pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <wire:icon :name="$icon" size="4" />
+                <wire:icon class="size-4" :name="$icon" size="4" />
             </div>
         @endif
 
@@ -89,7 +93,7 @@
                 @isset($iconAfter)
                     {{ $iconAfter }}
                 @else
-                    <wire:icon :name="$attributes->get('icon:after')" size="4" />
+                    <wire:icon class="size-4" :name="$attributes->get('icon:after')" size="4" />
                 @endisset
             </div>
         @endif
