@@ -14,7 +14,10 @@ export class Tree {
     private readonly _nested: boolean
     private _sortableInstances: Sortable[] = []
     private _draggedEl: HTMLElement | undefined
-    private _lastIndentX: number = 0
+    private _hasHandle: boolean = false
+    private _lastPointerX: number = 0
+    private _lastPointerY: number = 0
+    private _touchedGroups: Set<HTMLElement> = new Set()
 
     /**
      * Create a tree.
@@ -70,24 +73,36 @@ export class Tree {
             this._el,
             ...Array.from(this._el.querySelectorAll<HTMLElement>('[data-wire-tree-group]')),
         ]
-        this._sortableInstances = lists.map((list) => this.makeSortable(list))
+        this._hasHandle = this._el.querySelector('[data-wire-tree-handle]') !== null
+        this._sortableInstances = lists.map((list) => this.makeSortable(list, this._hasHandle))
     }
 
-    private makeSortable(list: HTMLElement): Sortable {
+    private makeSortable(list: HTMLElement, hasHandle: boolean): Sortable {
         const options: Sortable.Options = {
             animation: 150,
             forceFallback: true,
             fallbackOnBody: true,
-            handle: '[data-wire-tree-handle]',
+            ...(hasHandle
+                ? { handle: '[data-wire-tree-handle]' }
+                : { filter: 'button, [data-wire-tree-no-drag]', preventOnFilter: false }),
             ...(this._nested && { group: { name: 'wire-tree', pull: true, put: true } }),
             onStart: (evt) => {
                 this._draggedEl = evt.item
-                this._lastIndentX = 0
+                this._touchedGroups = new Set()
                 this._items.find((i) => i.el === this._draggedEl)?.collapse()
                 const row = evt.item.querySelector<HTMLElement>('[data-wire-tree-row]')
                 if (row) row.dataset.state = 'dragging'
-                if (this._nested) {
+                const suppressClick = (e: MouseEvent) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+                document.addEventListener('click', suppressClick, true)
+                setTimeout(() => document.removeEventListener('click', suppressClick, true), 0)
+                if (this._nested && this._hasHandle) {
                     document.addEventListener('pointermove', this.handleDragPointerMove)
+                }
+                if (this._nested && !this._hasHandle) {
+                    document.addEventListener('pointermove', this.trackPointer)
                 }
             },
             onEnd: this.handleSortEnd,
@@ -95,40 +110,39 @@ export class Tree {
         return Sortable.create(list, options)
     }
 
+    private trackPointer = (e: PointerEvent) => {
+        this._lastPointerX = e.clientX
+        this._lastPointerY = e.clientY
+    }
+
     private handleSortEnd = (evt: Sortable.SortableEvent) => {
         document.removeEventListener('pointermove', this.handleDragPointerMove)
+        document.removeEventListener('pointermove', this.trackPointer)
         this._draggedEl = undefined
-        this._lastIndentX = 0
 
         const row = evt.item.querySelector<HTMLElement>('[data-wire-tree-row]')
         if (row) row.dataset.state = ''
 
+        document.querySelectorAll('.sortable-fallback').forEach((el) => el.remove())
+
         const { from, to } = evt
 
+        if (from === to && !this._hasHandle) {
+            this.maybeNestOnDrop(evt.item)
+        }
+
         if (from !== to) {
-            // Expand the destination parent so the moved item is visible
             const destParentLi = to.parentElement
             if (destParentLi?.hasAttribute('data-wire-tree-item')) {
                 destParentLi.dataset.wireExpanded = 'true'
                 destParentLi.setAttribute('aria-expanded', 'true')
                 to.style.display = ''
             }
-
-            // Remove the source group if empty (never the root list)
-            if (from !== this._el && from.children.length === 0) {
-                const idx = this._sortableInstances.findIndex((s) => s.el === from)
-                if (idx !== -1) {
-                    this._sortableInstances[idx].destroy()
-                    this._sortableInstances.splice(idx, 1)
-                }
-                const srcParentLi = from.parentElement as HTMLElement | null
-                from.remove()
-                if (srcParentLi) {
-                    srcParentLi.removeAttribute('aria-expanded')
-                    delete srcParentLi.dataset.wireExpanded
-                }
-            }
         }
+
+        this.cleanupIfEmptyGroup(from)
+        this._touchedGroups.forEach((group) => this.cleanupIfEmptyGroup(group))
+        this._touchedGroups = new Set()
 
         this._el.dispatchEvent(
             new CustomEvent('wire:tree:reorder', { bubbles: true, detail: { order: this.serializeOrder() } }),
@@ -138,21 +152,114 @@ export class Tree {
         this.refreshItems()
     }
 
-    private handleDragPointerMove = (e: PointerEvent) => {
-        if (!this._draggedEl) return
-        if (this._lastIndentX === 0) {
-            this._lastIndentX = e.clientX
-            return
+    /**
+     * Finds the tree item under the pointer at drop time and, if it's a
+     * valid target (not the dragged item or one of its own descendants,
+     * not itself excluded from dragging via draggable="false"), nests the
+     * dragged item into it -- creating its group if it's currently
+     * childless. Runs after Sortable's own drop handling has fully
+     * settled, so mutating the DOM here is safe.
+     */
+    private maybeNestOnDrop(draggedEl: HTMLElement): void {
+        const targetEl = document.elementFromPoint(this._lastPointerX, this._lastPointerY)
+        const targetLi = targetEl?.closest<HTMLElement>('[data-wire-tree-item]')
+        if (!targetLi || targetLi === draggedEl) return
+        if (targetLi.contains(draggedEl) || draggedEl.contains(targetLi)) return
+        const targetRow = targetLi.querySelector<HTMLElement>('[data-wire-tree-row]')
+        if (targetRow?.hasAttribute('data-wire-tree-no-drag')) return
+
+        let group = Array.from(targetLi.children).find((c) => c.hasAttribute('data-wire-tree-group')) as
+            | HTMLElement
+            | undefined
+
+        if (!group) {
+            group = this.createGroup()
+            targetLi.appendChild(group)
+            this._sortableInstances.push(this.makeSortable(group, this._hasHandle))
         }
-        const THRESHOLD = 40
-        const delta = e.clientX - this._lastIndentX
-        if (delta > THRESHOLD && this.indentDraggedItem(this._draggedEl)) {
-            this._lastIndentX = e.clientX
-        } else if (delta < -THRESHOLD && this.outdentDraggedItem(this._draggedEl)) {
-            this._lastIndentX = e.clientX
+
+        group.appendChild(draggedEl)
+        targetLi.dataset.wireExpanded = 'true'
+        targetLi.setAttribute('aria-expanded', 'true')
+    }
+
+    /**
+     * Destroys and removes a [data-wire-tree-group] list once it's empty
+     * (never the root list), so a folder that no longer has children stops
+     * showing an expand toggle for nothing. Shared by the normal cross-list
+     * drop path and maybeNestOnDrop, either of which can be what emptied it.
+     */
+    private cleanupIfEmptyGroup(list: HTMLElement): void {
+        if (list === this._el || list.children.length > 0) return
+
+        const idx = this._sortableInstances.findIndex((s) => s.el === list)
+        if (idx !== -1) {
+            this._sortableInstances[idx].destroy()
+            this._sortableInstances.splice(idx, 1)
+        }
+        const parentLi = list.parentElement as HTMLElement | null
+        list.remove()
+        if (parentLi) {
+            parentLi.removeAttribute('aria-expanded')
+            delete parentLi.dataset.wireExpanded
         }
     }
 
+    /**
+     * Indents/outdents the dragged item based on where SortableJS's fallback
+     * ghost (`.sortable-fallback`, an absolutely-positioned clone that
+     * tracks the pointer -- present because every tree drag runs with
+     * forceFallback: true) actually sits, not on accumulated pointer
+     * movement. Re-evaluated from the live DOM on every move, so it's
+     * idempotent: the same ghost position always yields the same indent
+     * state, however much the pointer wiggled to get there.
+     *
+     * Indenting requires the ghost to clear the *next* indent level's row
+     * by INDENT_THRESHOLD; outdenting only requires it to fall back within
+     * OUTDENT_THRESHOLD of the current level's row. Using a smaller
+     * threshold to leave than to enter creates a dead zone between the two,
+     * so hovering near the boundary doesn't flicker in and out.
+     */
+    private handleDragPointerMove = (e: PointerEvent) => {
+        if (!this._draggedEl) return
+
+        const ghost = document.querySelector<HTMLElement>('.sortable-fallback')
+        const ghostLeft = ghost ? ghost.getBoundingClientRect().left : e.clientX
+
+        const INDENT_THRESHOLD = 32
+        const OUTDENT_THRESHOLD = 12
+
+        const prevSibling = this._draggedEl.previousElementSibling as HTMLElement | null
+        const prevRow = prevSibling?.hasAttribute('data-wire-tree-item')
+            ? prevSibling.querySelector<HTMLElement>('[data-wire-tree-row]')
+            : null
+
+        if (prevRow && ghostLeft - prevRow.getBoundingClientRect().left > INDENT_THRESHOLD) {
+            this.indentDraggedItem(this._draggedEl)
+            return
+        }
+
+        const currentGroup = this._draggedEl.parentElement
+        const parentLi = currentGroup?.hasAttribute('data-wire-tree-group')
+            ? (currentGroup.parentElement as HTMLElement | null)
+            : null
+        const parentRow = parentLi?.querySelector<HTMLElement>('[data-wire-tree-row]')
+
+        if (parentRow && ghostLeft - parentRow.getBoundingClientRect().left < OUTDENT_THRESHOLD) {
+            this.outdentDraggedItem(this._draggedEl)
+        }
+    }
+
+    /**
+     * Moves the dragged item into its previous sibling's group, creating
+     * that group (and a Sortable instance for it) if it doesn't exist yet.
+     * Never destroys a Sortable instance while a drag is in progress --
+     * SortableJS's own fallback drag loop can hold references into a list
+     * it's currently tracking, and destroying that list's instance out from
+     * under it corrupts its internal state (the `sortable[expando] is
+     * null` crash). Any group left empty by this gesture is only cleaned
+     * up once the drag fully settles, in handleSortEnd.
+     */
     private indentDraggedItem(draggedEl: HTMLElement): boolean {
         const prevSibling = draggedEl.previousElementSibling
         if (!prevSibling?.hasAttribute('data-wire-tree-item')) return false
@@ -164,16 +271,22 @@ export class Tree {
         if (!group) {
             group = this.createGroup()
             prevSibling.appendChild(group)
-            this._sortableInstances.push(this.makeSortable(group))
+            this._sortableInstances.push(this.makeSortable(group, this._hasHandle))
             ;(prevSibling as HTMLElement).dataset.wireExpanded = 'true'
             ;(prevSibling as HTMLElement).setAttribute('aria-expanded', 'true')
             group.style.display = ''
         }
 
+        this._touchedGroups.add(group)
         group.appendChild(draggedEl)
         return true
     }
 
+    /**
+     * Moves the dragged item back out to its parent group's own list. See
+     * indentDraggedItem for why an emptied group is left in the DOM (marked
+     * as touched) rather than destroyed here mid-drag.
+     */
     private outdentDraggedItem(draggedEl: HTMLElement): boolean {
         const currentGroup = draggedEl.parentElement
         if (!currentGroup?.hasAttribute('data-wire-tree-group')) return false
@@ -185,14 +298,9 @@ export class Tree {
         if (!grandparent) return false
 
         grandparent.insertBefore(draggedEl, parentLi.nextSibling)
+        this._touchedGroups.add(currentGroup)
 
         if (currentGroup.children.length === 0) {
-            const idx = this._sortableInstances.findIndex((s) => s.el === currentGroup)
-            if (idx !== -1) {
-                this._sortableInstances[idx].destroy()
-                this._sortableInstances.splice(idx, 1)
-            }
-            currentGroup.remove()
             parentLi.removeAttribute('aria-expanded')
             delete (parentLi as HTMLElement).dataset.wireExpanded
         }
@@ -200,12 +308,28 @@ export class Tree {
         return true
     }
 
+    /**
+     * Mirrors the classes item.blade.php renders on a group `<ul>`, keyed
+     * off the tree's variant, rather than copying an existing group's
+     * className -- there may not be one yet (e.g. indenting into a folder
+     * that's never had children before), and copying blind previously left
+     * a JS-created group missing rounded-tl-none entirely.
+     */
     private createGroup(): HTMLElement {
         const group = document.createElement('ul')
         group.setAttribute('role', 'group')
         group.dataset.wireTreeGroup = ''
-        const existing = this._el.querySelector<HTMLElement>('[data-wire-tree-group]')
-        group.className = existing ? existing.className : 'ml-4 flex flex-col gap-0.5'
+        const variant = this._el.dataset.wireTreeVariant
+        const classes = ['flex', 'flex-col']
+        if (variant === 'file') {
+            classes.push('border-border', 'ml-2', 'border-l', 'pl-2')
+        } else {
+            classes.push('ml-4')
+        }
+        if (variant === 'list') {
+            classes.push('[&>*:first-child>*]:rounded-tl-none')
+        }
+        group.className = classes.join(' ')
         return group
     }
 

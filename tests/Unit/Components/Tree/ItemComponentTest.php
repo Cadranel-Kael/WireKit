@@ -34,15 +34,22 @@ describe('Tree\Item', function () {
 
             expect($item->href)->toBeNull();
         });
+
+        it('is draggable by default', function () {
+            $item = new Item();
+
+            expect($item->draggable)->toBeTrue();
+        });
     });
 
     describe('props', function () {
-        it('accepts a label, icon, expanded, disabled and href', function () {
+        it('accepts a label, icon, expanded, disabled, draggable and href', function () {
             $item = new Item(
                 label: 'src',
                 icon: 'folder',
                 expanded: true,
                 disabled: true,
+                draggable: false,
                 href: '/src',
             );
 
@@ -50,6 +57,7 @@ describe('Tree\Item', function () {
             expect($item->icon)->toBe('folder');
             expect($item->expanded)->toBeTrue();
             expect($item->disabled)->toBeTrue();
+            expect($item->draggable)->toBeFalse();
             expect($item->href)->toBe('/src');
         });
     });

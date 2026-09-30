@@ -32,7 +32,7 @@
                 {{ $slot }}
             </span>
             @if ($shortcut)
-                <div class="text-muted-foreground ml-auto">{{ $shortcut }}</div>
+                <div class="text-muted-foOreground ml-auto">{{ $shortcut }}</div>
             @endif
         </button>
     @endif

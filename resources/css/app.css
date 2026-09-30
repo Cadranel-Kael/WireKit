@@ -23,6 +23,7 @@
 @layer base {
     [data-wire-tooltip-content],
     [data-wire-expanded='false'] > [data-wire-accordion-content],
+    [data-wire-expanded='false'] > [data-wire-tree-group],
     [data-wire-dropdown-panel],
     [data-wire-tabs] [data-wire-tab-panel]:not(:first-child) {
         display: none;

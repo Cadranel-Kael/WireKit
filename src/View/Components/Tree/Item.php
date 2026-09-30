@@ -20,6 +20,7 @@ class Item extends Component
         public string  $icon = '',
         public bool    $expanded = false,
         public bool    $disabled = false,
+        public bool    $draggable = true,
         public ?string $href = null,
     )
     {

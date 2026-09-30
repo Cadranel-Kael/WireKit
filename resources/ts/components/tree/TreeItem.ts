@@ -17,6 +17,7 @@ export class TreeItem {
     private readonly _row: HTMLElement
     private readonly _toggle: HTMLElement | null
     private readonly _group: HTMLElement | null
+    private readonly _variant: string | undefined
     private _isExpanded: boolean
     private _listeners: Array<(item: TreeItem) => void> = []
 
@@ -29,6 +30,7 @@ export class TreeItem {
         this._row = findChild(el, '[data-wire-tree-row]') as HTMLElement
         this._toggle = this._row?.querySelector<HTMLElement>('[data-wire-tree-toggle]') ?? null
         this._group = findChild(el, '[data-wire-tree-group]')
+        this._variant = el.closest<HTMLElement>('[data-wire-tree]')?.dataset.wireTreeVariant
         this._isExpanded = el.dataset.wireExpanded === 'true'
         this._row?.addEventListener('click', this.handleClick)
         this.sync()
@@ -107,14 +109,35 @@ export class TreeItem {
     private sync() {
         this._el.dataset.wireExpanded = String(this._isExpanded)
         if (this._toggle) {
-            this._toggle.style.display = 'none'
+            // The toggle is always rendered (so a group added later, e.g.
+            // by dragging an item into a previously-childless one, has
+            // something to show/wire up rather than needing new markup
+            // fabricated in JS). "file" rows always reserved a fixed-size
+            // box for it even without children (for alignment with rows
+            // that do have one), so hide it without collapsing that space;
+            // "list" rows never reserved space for a leaf, so hide it the
+            // normal way.
+            if (this._variant === 'file') {
+                this._toggle.style.visibility = 'hidden'
+            } else {
+                this._toggle.style.display = 'none'
+            }
         }
         if (this._group && this.hasChildren) {
             this._el.setAttribute('aria-expanded', String(this._isExpanded))
+            // Mirrored onto the row too: it (not the <li>) carries the
+            // `.group` class that `group-aria-expanded:*` utilities (the
+            // open/closed icon swap, and this row's own toggle icon) key
+            // off of -- Tailwind's `group-*` variants only match when both
+            // the class and the state attribute are on the same element.
+            this._row?.setAttribute('aria-expanded', String(this._isExpanded))
             this._group.style.display = this._isExpanded ? '' : 'none'
             if (this._toggle) {
+                this._toggle.style.visibility = ''
                 this._toggle.style.display = ''
-                this._toggle.style.transform = this._isExpanded ? '' : 'rotate(-90deg)'
+                // Base icon is chevron-right (collapsed, pointing at its
+                // child); rotate it to point down once expanded.
+                this._toggle.style.transform = this._isExpanded ? 'rotate(90deg)' : ''
             }
         }
     }

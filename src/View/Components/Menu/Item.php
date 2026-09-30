@@ -12,6 +12,7 @@ class Item extends Component
         public string $id = '',
         public string $shortcut = '',
         public string $href = '',
+
     )
     {
     }

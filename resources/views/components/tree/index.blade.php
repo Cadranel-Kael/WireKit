@@ -1,6 +1,7 @@
 <ol
     role="tree"
     data-wire-tree
+    data-wire-tree-variant="{{ $variant }}"
     id="{{ $id }}"
     @if ($sortable)
         data-wire-sortable
@@ -8,7 +9,7 @@
     @if ($nested)
         data-wire-nested
     @endif
-    {{ $attributes->class(["border-border bg-muted flex flex-col rounded-lg border p-2 text-sm", "gap-0.5" => $variant === "file"]) }}
+    {{ $attributes->class(["flex flex-col p-2 text-sm", "gap-0.5" => $variant === "file"]) }}
 >
     {{ $slot }}
 </ol>
