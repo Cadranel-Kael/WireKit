@@ -8,7 +8,7 @@
     >
         <span class="border-input-border flex size-4 shrink-0 items-center justify-center rounded-full border shadow-xs">
             @if ($active)
-                <span class="bg-foreground size-2 rounded-full"></span>
+                <span class="size-2 rounded-full bg-black"></span>
             @endif
         </span>
         <span class="whitespace-nowrap">
