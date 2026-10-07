@@ -40,9 +40,9 @@ class Button extends Component
     public function sizeClass()
     {
         return match ($this->size) {
-            'xs' => 'not-group-[.button-group]:h-6 px-2' . ($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
-            'sm' => 'not-group-[.button-group]:h-8 px-2' . ($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
-            default => 'not-group-[.button-group]:h-9 px-3' . ($this->inset ? ' -mt-3 -me-3 -mb-3 -ms-3' : '')
+            'xs' => 'h-6 px-2' . ($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
+            'sm' => 'h-8 px-2' . ($this->inset ? ' -mt-2 -me-2 -mb-2 -ms-2' : ''),
+            default => 'h-9 px-3' . ($this->inset ? ' -mt-3 -me-3 -mb-3 -ms-3' : '')
         };
     }
 

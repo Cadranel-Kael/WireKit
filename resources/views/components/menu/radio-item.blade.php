@@ -7,9 +7,7 @@
         type="button"
     >
         <span class="border-input-border flex size-4 shrink-0 items-center justify-center rounded-full border shadow-xs">
-            @if ($active)
-                <span class="size-2 rounded-full bg-black"></span>
-            @endif
+            <span class="hidden size-2 rounded-full bg-black group-aria-checked:block"></span>
         </span>
         <span class="whitespace-nowrap">
             {{ $slot }}

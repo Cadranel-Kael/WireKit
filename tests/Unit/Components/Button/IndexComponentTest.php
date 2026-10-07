@@ -58,19 +58,19 @@ describe('Button\Index', function () {
 
     describe('sizeClass()', function () {
         it('resolves xs and sm without inset', function () {
-            expect((new Index(size: 'xs'))->sizeClass())->toBe('not-group-[.button-group]:h-6 px-2');
-            expect((new Index(size: 'sm'))->sizeClass())->toBe('not-group-[.button-group]:h-8 px-2');
+            expect((new Index(size: 'xs'))->sizeClass())->toBe('h-6 px-2');
+            expect((new Index(size: 'sm'))->sizeClass())->toBe('h-8 px-2');
         });
 
         it('resolves the default size without inset', function () {
-            expect((new Index())->sizeClass())->toBe('not-group-[.button-group]:h-9 px-3');
+            expect((new Index())->sizeClass())->toBe('h-9 px-3');
         });
 
         it('appends negative margins when inset is true', function () {
             expect((new Index(size: 'xs', inset: true))->sizeClass())
-                ->toBe('not-group-[.button-group]:h-6 px-2 -mt-2 -me-2 -mb-2 -ms-2');
+                ->toBe('h-6 px-2 -mt-2 -me-2 -mb-2 -ms-2');
             expect((new Index(inset: true))->sizeClass())
-                ->toBe('not-group-[.button-group]:h-9 px-3 -mt-3 -me-3 -mb-3 -ms-3');
+                ->toBe('h-9 px-3 -mt-3 -me-3 -mb-3 -ms-3');
         });
     });
 });
