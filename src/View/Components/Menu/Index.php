@@ -9,6 +9,7 @@ class Index extends Component
 {
     public function __construct(
         public string $id = '',
+        public string $placement = 'bottom-start',
     )
     {
     }

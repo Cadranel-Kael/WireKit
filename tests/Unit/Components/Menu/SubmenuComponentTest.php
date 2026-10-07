@@ -10,6 +10,12 @@ describe('Menu\Submenu', function () {
 
             expect($submenu->heading)->toBe('');
         });
+
+        it('defaults placement to right-start', function () {
+            $submenu = new Submenu();
+
+            expect($submenu->placement)->toBe('right-start');
+        });
     });
 
     describe('props', function () {
@@ -17,6 +23,12 @@ describe('Menu\Submenu', function () {
             $submenu = new Submenu(heading: 'More actions');
 
             expect($submenu->heading)->toBe('More actions');
+        });
+
+        it('accepts a placement', function () {
+            $submenu = new Submenu(placement: 'left-start');
+
+            expect($submenu->placement)->toBe('left-start');
         });
     });
 

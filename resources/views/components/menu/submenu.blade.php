@@ -14,12 +14,7 @@
             class="ml-auto"
         />
     </button>
-    <wire:menu
-        id="submenu-{{ $id }}"
-        data-wire-menu-sub
-        popover
-        class="fixed [position-anchor:auto] [position-area:right_span-top] [position-try-fallbacks:flip-inline]"
-    >
+    <wire:menu id="submenu-{{ $id }}" data-wire-menu-sub popover :placement="$placement">
         {{ $slot }}
     </wire:menu>
 </li>

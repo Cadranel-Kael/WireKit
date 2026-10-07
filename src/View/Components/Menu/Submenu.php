@@ -11,6 +11,7 @@ class Submenu extends Component
 
     public function __construct(
         public string $heading = '',
+        public string $placement = 'right-start',
     )
     {
         $this->id = uniqid();

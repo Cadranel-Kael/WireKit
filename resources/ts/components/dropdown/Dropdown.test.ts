@@ -1,5 +1,18 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Dropdown } from './Dropdown'
+
+vi.mock('@floating-ui/dom', () => ({
+    computePosition: vi.fn(() => Promise.resolve({ x: 12, y: 34 })),
+    flip: vi.fn(),
+    offset: vi.fn(),
+    shift: vi.fn(),
+}))
+
+function dispatchToggle(el: HTMLElement, newState: 'open' | 'closed'): void {
+    const event = new Event('toggle') as Event & { newState?: string }
+    event.newState = newState
+    el.dispatchEvent(event)
+}
 
 function makeDropdownEl(itemCount = 3): { el: HTMLElement; items: HTMLElement[] } {
     const el = document.createElement('div')
@@ -134,6 +147,99 @@ describe('Dropdown', () => {
                 el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
             }).not.toThrow()
             expect(document.activeElement).toBe(items[0])
+        })
+    })
+
+    describe('positioning', () => {
+        it('computes and applies position when a popover target opens', async () => {
+            const { computePosition } = await import('@floating-ui/dom')
+            const { el } = makeDropdownEl(0)
+
+            const trigger = document.createElement('button')
+            trigger.setAttribute('popovertarget', 'menu-1')
+            el.appendChild(trigger)
+
+            const target = document.createElement('div')
+            target.id = 'menu-1'
+            target.dataset.wirePlacement = 'bottom-end'
+            document.body.appendChild(target)
+
+            new Dropdown(el)
+            dispatchToggle(target, 'open')
+            await Promise.resolve()
+            await Promise.resolve()
+
+            expect(computePosition).toHaveBeenCalledWith(
+                trigger,
+                target,
+                expect.objectContaining({ strategy: 'fixed', placement: 'bottom-end' }),
+            )
+            expect(target.style.left).toBe('12px')
+            expect(target.style.top).toBe('34px')
+        })
+
+        it('defaults to bottom-start when no placement is set', async () => {
+            const { computePosition } = await import('@floating-ui/dom')
+            const { el } = makeDropdownEl(0)
+
+            const trigger = document.createElement('button')
+            trigger.setAttribute('popovertarget', 'menu-2')
+            el.appendChild(trigger)
+
+            const target = document.createElement('div')
+            target.id = 'menu-2'
+            document.body.appendChild(target)
+
+            new Dropdown(el)
+            dispatchToggle(target, 'open')
+            await Promise.resolve()
+
+            expect(computePosition).toHaveBeenCalledWith(
+                trigger,
+                target,
+                expect.objectContaining({ placement: 'bottom-start' }),
+            )
+        })
+
+        it('does nothing when the popover closes', async () => {
+            const { computePosition } = await import('@floating-ui/dom')
+            vi.mocked(computePosition).mockClear()
+            const { el } = makeDropdownEl(0)
+
+            const trigger = document.createElement('button')
+            trigger.setAttribute('popovertarget', 'menu-3')
+            el.appendChild(trigger)
+
+            const target = document.createElement('div')
+            target.id = 'menu-3'
+            document.body.appendChild(target)
+
+            new Dropdown(el)
+            dispatchToggle(target, 'closed')
+            await Promise.resolve()
+
+            expect(computePosition).not.toHaveBeenCalled()
+        })
+
+        it('stops repositioning after destroy()', async () => {
+            const { computePosition } = await import('@floating-ui/dom')
+            vi.mocked(computePosition).mockClear()
+            const { el } = makeDropdownEl(0)
+
+            const trigger = document.createElement('button')
+            trigger.setAttribute('popovertarget', 'menu-4')
+            el.appendChild(trigger)
+
+            const target = document.createElement('div')
+            target.id = 'menu-4'
+            document.body.appendChild(target)
+
+            const dropdown = new Dropdown(el)
+            dropdown.destroy()
+            dispatchToggle(target, 'open')
+            await Promise.resolve()
+
+            expect(computePosition).not.toHaveBeenCalled()
         })
     })
 
