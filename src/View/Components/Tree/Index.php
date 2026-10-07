@@ -23,6 +23,14 @@ class Index extends Component
         $this->id = $id ?? 'tree-' . uniqid();
     }
 
+    public function variantClass(): string
+    {
+        return match ($this->variant) {
+            'file' => 'gap-0.5',
+            default => '',
+        };
+    }
+
     public function render(): View
     {
         return view('wire-kit::components.tree.index');

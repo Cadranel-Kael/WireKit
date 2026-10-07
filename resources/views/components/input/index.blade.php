@@ -49,13 +49,13 @@
                 {{ $attributes }}
             />
             <wire:input.button :clearable="$clearable" :revealable="$revealable" :copyable="$copyable" />
-            @if ($attributes->get("icon:after", false) || isset($iconAfter))
+            @if ($attributes->get("icon:after", false) || $after)
                 <div class="text-muted-foreground absolute inset-y-0 right-0 flex items-center pr-3">
-                    @isset($iconAfter)
-                        {{ $iconAfter }}
+                    @if ($after)
+                        {{ $after }}
                     @else
                         <wire:icon class="pointer-events-none size-4" :name="$attributes->get('icon:after')" size="4" />
-                    @endisset
+                    @endif
                 </div>
             @endif
         </div>
@@ -88,13 +88,13 @@
         <wire:input.input :icon="$icon" :left-icon="$attributes->get('icon:after')" :id="$labelId" {{ $attributes }} />
         <wire:input.button :clearable="$clearable" :revealable="$revealable" :copyable="$copyable" />
 
-        @if ($attributes->get("icon:after", false) || isset($iconAfter))
+        @if ($attributes->get("icon:after", false) || $after)
             <div class="text-muted-foreground pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                @isset($iconAfter)
-                    {{ $iconAfter }}
+                @if ($after)
+                    {{ $after }}
                 @else
                     <wire:icon class="size-4" :name="$attributes->get('icon:after')" size="4" />
-                @endisset
+                @endif
             </div>
         @endif
     </div>

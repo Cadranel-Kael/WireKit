@@ -15,7 +15,6 @@ class Index extends Component
         public string $variant = '',
         public string $color = '',
         public string $icon = '',
-        public string $iconVariant = '',
         public string $controls = '',
         public string $actions = '',
         public bool $inline = false,

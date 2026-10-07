@@ -17,7 +17,6 @@ class Index extends Component
         public string $size = '',
         public string $variant = '',
         public string $icon = '',
-        public string $iconRight = '',
         public string $as = '',
         public bool $dot = false,
     )

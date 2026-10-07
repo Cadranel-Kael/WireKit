@@ -18,7 +18,7 @@ class Index extends Component
         public bool    $clearable = false,
         public bool    $revealable = false,
         public bool    $copyable = false,
-        public string  $iconAfter = '',
+        public ?string $after = null,
     )
     {
     }

@@ -64,7 +64,7 @@ describe('Input\Index', function () {
                 clearable: true,
                 revealable: true,
                 copyable: true,
-                iconAfter: 'check',
+                after: 'check',
             );
 
             expect($input->label)->toBe('Email');
@@ -77,7 +77,7 @@ describe('Input\Index', function () {
             expect($input->clearable)->toBeTrue();
             expect($input->revealable)->toBeTrue();
             expect($input->copyable)->toBeTrue();
-            expect($input->iconAfter)->toBe('check');
+            expect($input->after)->toBe('check');
         });
     });
 

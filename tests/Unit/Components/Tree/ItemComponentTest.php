@@ -82,4 +82,54 @@ describe('Tree\Item', function () {
             expect($a->id)->not->toBe($b->id);
         });
     });
+
+    describe('rowClass()', function () {
+        it('resolves the list variant', function () {
+            $item = new Item();
+
+            expect($item->rowClass('list', false))
+                ->toBe('bg-background border-background rounded-xl border px-4 py-2.5 shadow-sm first:mt-px');
+        });
+
+        it('adds dragging classes for a sortable list', function () {
+            $item = new Item();
+
+            expect($item->rowClass('list', true))->toBe(
+                'bg-background border-background rounded-xl border px-4 py-2.5 shadow-sm first:mt-px '
+                . 'dragging:border-primary dragging:bg-primary/50 dragging:*:opacity-0 dragging:border-dashed relative pr-2.5 pl-1.5'
+            );
+        });
+
+        it('resolves the file variant', function () {
+            $item = new Item();
+
+            expect($item->rowClass('file', false))->toBe('text-muted-foreground hover:bg-muted');
+        });
+
+        it('falls back to an empty class for any other variant', function () {
+            $item = new Item();
+
+            expect($item->rowClass('mystery', false))->toBe('');
+        });
+    });
+
+    describe('groupClass()', function () {
+        it('resolves the file variant', function () {
+            $item = new Item();
+
+            expect($item->groupClass('file'))->toBe('border-border ml-2 border-l pl-2');
+        });
+
+        it('resolves the list variant', function () {
+            $item = new Item();
+
+            expect($item->groupClass('list'))->toBe('ml-4 [&>*:first-child>*]:rounded-tl-none');
+        });
+
+        it('falls back to ml-4 for any other variant', function () {
+            $item = new Item();
+
+            expect($item->groupClass('mystery'))->toBe('ml-4');
+        });
+    });
 });

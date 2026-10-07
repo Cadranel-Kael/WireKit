@@ -10,14 +10,13 @@ describe('Badge\Index', function () {
             expect($badge->color)->toBe('core');
         });
 
-        it('has empty colorVariant, size, variant, icon, iconRight and as by default', function () {
+        it('has empty colorVariant, size, variant, icon and as by default', function () {
             $badge = new Index();
 
             expect($badge->colorVariant)->toBe('');
             expect($badge->size)->toBe('');
             expect($badge->variant)->toBe('');
             expect($badge->icon)->toBe('');
-            expect($badge->iconRight)->toBe('');
             expect($badge->as)->toBe('');
         });
 

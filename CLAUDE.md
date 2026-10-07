@@ -24,6 +24,34 @@ before editing either one, or you'll fix dead code. This bit a previous session:
 `WireKitServiceProvider`. A custom precompiler (`src/WireKitTagCompiler.php`, extending Laravel's
 `ComponentTagCompiler`) handles the `<wire:…>` tag syntax itself.
 
+### Styling a nested element: `[element]:[attribute]`
+
+When a component's view renders a nested named element or component internally (an icon inside a button, a heading
+inside an alert, a container `<div>` inside an input), expose that nested element's styling/config as namespaced
+attributes on the outer tag — `[element]:[attribute]` — rather than a dedicated constructor prop:
+
+```blade
+<wire:button icon="check" icon:right="chevron-down" icon:class="text-accent" />
+<wire:alert heading="Heads up" heading:class="font-bold" icon:variant="solid" />
+```
+
+The view reads these off `$attributes`, not off typed props, with the bare-element default as the fallback:
+
+```blade
+<wire:icon :name="$icon" :variant="$attributes->get('icon:variant', '')" :size="$attributes->get('icon:size', '')" />
+```
+
+Do **not** add a constructor prop like `iconVariant` or `iconRight` for this — a typed prop and the `icon:variant`
+attribute can silently diverge (the prop goes dead while the view keeps reading the attribute, or vice versa).
+`icon`, `heading`, `description`, `label`, `container`, `actions`, `legend`, `fields`, `img`, `name`, `display`,
+`input`, `open` are the namespaces already in use across components — reuse one of these for the matching nested
+element rather than inventing a new name.
+
+If `Index` delegates rendering to a separate primitive sub-component (e.g. `<wire:button.button>`, not an inline
+`<wire:icon>` in the same view), forward the **whole** `$attributes` bag to it (`{{ $attributes }}`, as
+`input/index.blade.php` does for `<wire:input.input>`), not just the computed `class` string — otherwise any
+`icon:*`-style attribute the caller set on the outer tag never reaches the primitive that reads it.
+
 ## Styling
 
 - Tailwind utility strings built in PHP (`match ($this->variant) { ... }`), not Blade `@class` arrays, for anything

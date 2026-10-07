@@ -19,9 +19,7 @@
     @php
         $rowClasses = [
             "group dragging:cursor-grabbing focus-visible:focus-ring flex w-full items-center gap-1.5 rounded px-2 py-1.5 text-start outline-none",
-            "bg-background border-background rounded-xl border px-4 py-2.5 shadow-sm first:mt-px" => $variant === "list",
-            "dragging:border-primary dragging:bg-primary/50 dragging:*:opacity-0 dragging:border-dashed relative pr-2.5 pl-1.5" => $variant === "list" && $sortable === true,
-            "text-muted-foreground hover:bg-muted" => $variant === "file",
+            $rowClass($variant, $sortable),
             "opacity-50" => $disabled,
         ];
     @endphp
@@ -142,12 +140,7 @@
         <ul
             role="group"
             data-wire-tree-group
-            @class([
-                "flex flex-col",
-                "ml-4" => $variant !== "file",
-                "border-border ml-2 border-l pl-2" => $variant === "file",
-                "[&>*:first-child>*]:rounded-tl-none" => $variant === "list",
-            ])
+            @class(["flex flex-col", $groupClass($variant)])
         >
             {{ $slot }}
         </ul>

@@ -24,4 +24,18 @@ describe('Tree\Index', function () {
             expect($a->id)->not->toBe($b->id);
         });
     });
+
+    describe('variantClass()', function () {
+        it('resolves the file variant', function () {
+            $tree = new Index(variant: 'file');
+
+            expect($tree->variantClass())->toBe('gap-0.5');
+        });
+
+        it('falls back to an empty class for any other variant', function () {
+            $tree = new Index(variant: 'list');
+
+            expect($tree->variantClass())->toBe('');
+        });
+    });
 });

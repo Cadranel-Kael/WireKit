@@ -33,7 +33,6 @@ describe('Alert\Index', function () {
                 variant: 'success',
                 color: 'green',
                 icon: 'circle-check',
-                iconVariant: 'solid',
                 controls: 'dismiss',
                 actions: 'retry',
                 inline: true,
@@ -44,7 +43,6 @@ describe('Alert\Index', function () {
             expect($alert->variant)->toBe('success');
             expect($alert->color)->toBe('green');
             expect($alert->icon)->toBe('circle-check');
-            expect($alert->iconVariant)->toBe('solid');
             expect($alert->controls)->toBe('dismiss');
             expect($alert->actions)->toBe('retry');
             expect($alert->inline)->toBeTrue();

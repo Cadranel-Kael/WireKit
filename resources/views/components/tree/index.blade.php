@@ -9,7 +9,7 @@
     @if ($nested)
         data-wire-nested
     @endif
-    {{ $attributes->class(["flex flex-col p-2 text-sm", "gap-0.5" => $variant === "file"]) }}
+    {{ $attributes->class(["flex flex-col p-2 text-sm", $variantClass()]) }}
 >
     {{ $slot }}
 </ol>
