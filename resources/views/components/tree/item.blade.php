@@ -37,7 +37,7 @@
             @class($rowClasses)
         >
             <a href="{{ $href }}" {{ $attributes->class("flex min-w-0 flex-1 items-center gap-1.5") }}>
-                @if ($variant === "file")
+                @if ($variant === "file" && $hasChildren)
                     <button
                         type="button"
                         data-wire-tree-toggle
@@ -84,7 +84,7 @@
             @endunless
             {{ $attributes->class($rowClasses) }}
         >
-            @if ($variant === "file")
+            @if ($variant === "file" && $hasChildren)
                 <button
                     type="button"
                     data-wire-tree-toggle
@@ -121,7 +121,7 @@
 
             <span class="truncate">{{ $label }}</span>
 
-            @if ($variant === "list")
+            @if ($variant === "list" && $hasChildren)
                 <wire:button data-wire-tree-toggle icon="chevron-down" variant="ghost" size="xs" inset class="ml-1" />
             @endif
 
