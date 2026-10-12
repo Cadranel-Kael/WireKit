@@ -87,6 +87,19 @@ export class TreeItem {
         this._row?.focus()
     }
 
+    /**
+     * Mirrors a mouse click on the row -- clicking the nested link if the
+     * item renders one (so Enter navigates the same way a pointer click
+     * does), falling back to the row itself (so a folder with no link but
+     * a wire:click of its own, or a childless row with neither, still gets
+     * the same click dispatch a mouse would produce).
+     */
+    activate() {
+        if (this.isDisabled) return
+        const link = this._row?.querySelector<HTMLAnchorElement>('a')
+        ;(link ?? this._row)?.click()
+    }
+
     destroy() {
         this._row?.removeEventListener('click', this.handleClick)
     }
@@ -109,14 +122,6 @@ export class TreeItem {
     private sync() {
         this._el.dataset.wireExpanded = String(this._isExpanded)
         if (this._toggle) {
-            // The toggle is always rendered (so a group added later, e.g.
-            // by dragging an item into a previously-childless one, has
-            // something to show/wire up rather than needing new markup
-            // fabricated in JS). "file" rows always reserved a fixed-size
-            // box for it even without children (for alignment with rows
-            // that do have one), so hide it without collapsing that space;
-            // "list" rows never reserved space for a leaf, so hide it the
-            // normal way.
             if (this._variant === 'file') {
                 this._toggle.style.visibility = 'hidden'
             } else {
@@ -125,18 +130,11 @@ export class TreeItem {
         }
         if (this._group && this.hasChildren) {
             this._el.setAttribute('aria-expanded', String(this._isExpanded))
-            // Mirrored onto the row too: it (not the <li>) carries the
-            // `.group` class that `group-aria-expanded:*` utilities (the
-            // open/closed icon swap, and this row's own toggle icon) key
-            // off of -- Tailwind's `group-*` variants only match when both
-            // the class and the state attribute are on the same element.
             this._row?.setAttribute('aria-expanded', String(this._isExpanded))
             this._group.style.display = this._isExpanded ? '' : 'none'
             if (this._toggle) {
                 this._toggle.style.visibility = ''
                 this._toggle.style.display = ''
-                // Base icon is chevron-right (collapsed, pointing at its
-                // child); rotate it to point down once expanded.
                 this._toggle.style.transform = this._isExpanded ? 'rotate(90deg)' : ''
             }
         }
