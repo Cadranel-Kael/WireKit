@@ -47,4 +47,21 @@ describe('initTrees()', () => {
 
         expect(second).toHaveLength(0)
     })
+
+    it('constructs an instance when root itself is a [data-wire-tree] node', () => {
+        const el = makeTreeEl()
+
+        const result = initTrees(el)
+
+        expect(result).toHaveLength(1)
+        expect(result[0]).toBeInstanceOf(Tree)
+    })
+
+    it('does not double-construct when root itself matches and is also matched by querySelectorAll', () => {
+        const el = makeTreeEl()
+
+        const result = initTrees(el)
+
+        expect(result).toHaveLength(1)
+    })
 })
