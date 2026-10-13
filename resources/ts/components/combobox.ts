@@ -1,10 +1,8 @@
-// Factory
 export function initComboboxes(root: ParentNode = document) {
     const nodes = root.querySelectorAll<HTMLElement>('[data-wire-combobox]');
     return Array.from(nodes).map((node) => new Combobox(node));
 }
 
-// Helpers
 function getVisibleOptions(list: HTMLElement): HTMLElement[] {
     return Array.from(list.querySelectorAll('[data-wire-option]')).filter((option) => {
         const el = option as HTMLElement;
@@ -13,7 +11,6 @@ function getVisibleOptions(list: HTMLElement): HTMLElement[] {
     }) as HTMLElement[];
 }
 
-// Class
 class Combobox {
     private combobox: HTMLElement;
     private list: HTMLElement;
@@ -186,7 +183,6 @@ class Combobox {
     }
 }
 
-// Executables
 document.addEventListener('DOMContentLoaded', () => {
     initComboboxes();
 });

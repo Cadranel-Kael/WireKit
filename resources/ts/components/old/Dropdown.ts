@@ -12,41 +12,17 @@ export class Dropdown implements MenuController {
     private _trigger!: HTMLButtonElement;
     private _manager!: MenuManager;
 
-    /**
-     * Constructor
-     *
-     * Initializes the dropdown component by:
-     * - Finding and validating menu and trigger elements in the DOM
-     * - Creating a Menu instance
-     * - Assigning unique IDs to menu and trigger for ARIA attributes
-     * - Registering all menus (main and submenus) with the MenuManager
-     * - Attaching event listeners
-     * - Setting initial state (closed)
-     *
-     * @param el - The root element containing the dropdown menu and trigger
-     */
     constructor(private el: HTMLElement) {
         this.initializeItems();
         this.attachTargetListeners();
         this.close(true);
     }
 
-    /**
-     * Recursively registers a menu and all its submenus with the MenuManager
-     *
-     * @param manager - The MenuManager instance to register menus with
-     */
     private registerAllMenus(manager: MenuManager) {
         manager.registerMenu(this.menu);
         this.registerSubmenusRecursively(this.menu, manager);
     }
 
-    /**
-     * Recursively traverses menu items and registers any submenus found
-     *
-     * @param menu - The current menu being processed
-     * @param manager - The MenuManager instance to register submenus with
-     */
     private registerSubmenusRecursively(menu: Menu, manager: MenuManager) {
         menu.items.forEach((item) => {
             if (item.subMenu) {
@@ -56,23 +32,10 @@ export class Dropdown implements MenuController {
         });
     }
 
-    /**
-     * Returns the main Menu instance
-     *
-     * @returns The Menu object managed by this dropdown
-     */
     get menu(): Menu {
         return this._menu;
     }
 
-    /**
-     * Opens the dropdown menu
-     *
-     * Sets the menu to visible, focuses on it, updates ARIA attributes,
-     * and dispatches a 'dropdown:open' event. Does nothing if already open.
-     *
-     * @param force - If true, forces the menu to open even if it is already open
-     */
     open(force: boolean = false): void {
         if (!force && this.isOpen()) return;
 
@@ -82,14 +45,6 @@ export class Dropdown implements MenuController {
         this._trigger.dispatchEvent(new CustomEvent('dropdown:open'));
     }
 
-    /**
-     * Closes the dropdown menu
-     *
-     * Hides the menu, updates ARIA attributes, and dispatches a 'dropdown:close' event.
-     * Does nothing if already closed.
-     *
-     * @param force - If true, forces the menu to close even if it is already closed
-     */
     close(force: boolean = false): void {
         if (!force && !this.isOpen()) return;
 
@@ -99,18 +54,10 @@ export class Dropdown implements MenuController {
         this._trigger.dispatchEvent(new CustomEvent('dropdown:close'));
     }
 
-    /**
-     * Checks if the dropdown menu is currently open
-     *
-     * @returns True if the menu is open, false otherwise
-     */
     private isOpen(): boolean {
         return this._manager.isMenuOpen(this);
     }
 
-    /**
-     * Toggles the dropdown menu between open and closed states
-     */
     private toggle(): void {
         if (this.isOpen()) {
             this.close();
@@ -119,35 +66,14 @@ export class Dropdown implements MenuController {
         }
     }
 
-    /**
-     * Checks if a given element is contained within this dropdown
-     * (either in the menu or the trigger button)
-     *
-     * @param element - The element to check
-     * @returns True if the element is part of this dropdown, false otherwise
-     */
     containsElement(element: HTMLElement): boolean {
         return this.menu.el.contains(element) || this._trigger.contains(element);
     }
 
-    /**
-     * Destroys the dropdown component
-     *
-     * @throws Error - Currently not implemented
-     */
     destroy(): void {
         this._manager.unregisterController(this);
     }
 
-    /**
-     * Handles keyboard navigation for the dropdown
-     *
-     * Supports:
-     * - ArrowDown: Opens the menu and activates the first item
-     * - ArrowUp: Opens the menu and activates the last item
-     *
-     * @param e - The keyboard event
-     */
     private handleKeyDown(e: KeyboardEvent): void {
         if (!['ArrowDown', 'ArrowUp'].includes(e.key)) return;
 
@@ -165,13 +91,6 @@ export class Dropdown implements MenuController {
         }
     }
 
-    /**
-     * Attaches event listeners to the trigger element
-     *
-     * Listeners:
-     * - click: Toggles the dropdown open/closed
-     * - keydown: Handles keyboard navigation (ArrowUp, ArrowDown)
-     */
     private attachTargetListeners() {
         this._trigger.addEventListener('click', () => {
             this.toggle();
@@ -181,13 +100,7 @@ export class Dropdown implements MenuController {
     }
 
     /**
-     * Initializes the menu items for this dropdown
-     * - Finds the menu and trigger elements in the DOM
-     * - Creates a Menu instance for the dropdown menu
-     * - Assigns unique IDs to the menu and trigger for ARIA attributes
-     * - Registers all menus (main and submenus) with the MenuManager
-     * - Registers this dropdown as a controller with the MenuManager
-     * @throws Error if the menu or trigger elements are not found in the DOM
+     * @throws Error if the menu or trigger elements are not found in the DOM.
      */
     private initializeItems() {
         this._manager = MenuManager.getInstance();

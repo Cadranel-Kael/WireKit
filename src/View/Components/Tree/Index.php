@@ -5,10 +5,9 @@ namespace WireKit\View\Components\Tree;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-/*
+/**
  * A nestable treeview component.
  */
-
 class Index extends Component
 {
     public string $id;
@@ -23,6 +22,9 @@ class Index extends Component
         $this->id = $id ?? 'tree-' . uniqid();
     }
 
+    /**
+     * Determine the spacing class for the tree's variant.
+     */
     public function variantClass(): string
     {
         return match ($this->variant) {

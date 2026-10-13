@@ -5,11 +5,10 @@ namespace WireKit\View\Components\Tree;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-/*
+/**
  * A single node in a tree. Nest <wire:tree.item> components inside the
  * default slot to build branches of arbitrary depth.
  */
-
 class Item extends Component
 {
     public string $id;
@@ -27,6 +26,9 @@ class Item extends Component
         $this->id = $id ?? 'tree-item-' . uniqid();
     }
 
+    /**
+     * Determine the row classes for the item's tree variant, including the drag-state styling when sortable.
+     */
     public function rowClass(string $variant, bool $sortable): string
     {
         return trim(implode(' ', array_filter([
@@ -36,6 +38,9 @@ class Item extends Component
         ])));
     }
 
+    /**
+     * Determine the nested-group indentation class for the item's tree variant.
+     */
     public function groupClass(string $variant): string
     {
         return match ($variant) {

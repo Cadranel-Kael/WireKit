@@ -12,12 +12,6 @@ export class Menu {
     private _parentItem?: MenuItem;
     private readonly _manager?: MenuManager;
 
-    /**
-     * Creates a new Menu instance.
-     * @param el - The HTML element representing the menu
-     * @param parentItem - Optional parent menu item if this is a submenu
-     * @param manager - Optional MenuManager instance for coordinating global interactions
-     */
     constructor(el: HTMLElement, parentItem?: MenuItem, manager?: MenuManager) {
         this._el = el;
         this._parentItem = parentItem;
@@ -110,10 +104,6 @@ export class Menu {
         this.syncItemStates();
     }
 
-    /* -------------------------
-       Event Handlers
-    -------------------------- */
-
     handleMouseOver(e: MouseEvent) {
         const target = e.target as HTMLElement;
 
@@ -146,10 +136,6 @@ export class Menu {
         return false;
     }
 
-    /* -------------------------
-       Navigation
-    -------------------------- */
-
     private openSubMenu() {
         const item = this._items[this._activeIndex];
         if (!item?.subMenu) return false;
@@ -172,10 +158,6 @@ export class Menu {
 
         return true;
     }
-
-    /* -------------------------
-       Internal
-    -------------------------- */
 
     private initializeItems() {
         const elements = Array.from(this._el.querySelectorAll<HTMLElement>(':scope > ul > li > [data-wire-menu-item]'));

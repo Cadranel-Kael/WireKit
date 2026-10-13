@@ -139,10 +139,7 @@ class WireKitTagCompiler extends ComponentTagCompiler
     }
 
     /**
-     * Process boolean blade directives before compilation
-     *
-     * @param string $attributeString
-     * @return string
+     * Process boolean blade directives before compilation.
      */
     protected function preProcessBooleanDirectives(string $attributeString): string
     {

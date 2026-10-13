@@ -5,11 +5,10 @@ namespace WireKit\View\Components\FilePreview;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-/*
+/**
  * Previews a file: an image when a source is given, otherwise a muted
  * square with an icon and an uppercase extension label.
  */
-
 class Index extends Component
 {
     public function __construct(
@@ -20,6 +19,9 @@ class Index extends Component
         public string $rounded = 'md',
     ) {}
 
+    /**
+     * Determine the corner-rounding class for the preview.
+     */
     public function roundedClass(): string
     {
         return match ($this->rounded) {

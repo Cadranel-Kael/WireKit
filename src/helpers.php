@@ -1,6 +1,9 @@
 <?php
 
 if (!function_exists('getColorClass')) {
+    /**
+     * Map a semantic or Tailwind color name to its text/background class string for the given variant and context.
+     */
     function getColorClass(string $color = 'zinc', string $variant = '', string $context = ''): string
     {
         return match ($color) {
@@ -148,6 +151,9 @@ if (!function_exists('getColorClass')) {
 }
 
 if (!function_exists('getInitials')) {
+    /**
+     * Derive a one- or two-letter initials string from a name.
+     */
     function getInitials(string $name)
     {
         $words = explode(' ', $name);
@@ -170,6 +176,10 @@ if (!function_exists('getInitials')) {
 }
 
 if (!function_exists('twMerge')) {
+    /**
+     * Override $default's classes with $incoming's for a fixed set of utility prefixes (size-, text-, bg-, etc.),
+     * rather than resolving Tailwind conflicts generally.
+     */
     function twMerge(string $default, ?string $incoming): string
     {
         if (!$incoming) {

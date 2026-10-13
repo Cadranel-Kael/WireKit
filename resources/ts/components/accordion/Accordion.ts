@@ -1,6 +1,5 @@
 /**
  * An accordion item that can belong to a group.
- * @class
  */
 export class Accordion {
     private _isExpanded: boolean;
@@ -13,10 +12,6 @@ export class Accordion {
     private _onTransitionEnd?: (e: TransitionEvent) => void;
     private readonly _el: HTMLElement;
 
-    /**
-     * Create an accordion item.
-     * @param el
-     */
     constructor(el: HTMLElement) {
         this._el = el;
         this._isExpanded = el.dataset.wireExpanded === 'true';

@@ -5,6 +5,9 @@ namespace WireKit\View\Components\Calendar;
 use Carbon\Carbon;
 use Illuminate\View\Component;
 
+/**
+ * A month calendar grid.
+ */
 class Index extends Component
 {
     public Carbon $date;
@@ -21,39 +24,48 @@ class Index extends Component
         $this->date = Carbon::create($this->year, $this->month);
     }
 
+    /**
+     * Get the abbreviated name of each month of the year.
+     */
     public function months()
     {
         return array_map(fn ($month) => Carbon::create(null, $month)->format('M'), range(1, 12));
     }
 
+    /**
+     * Get the current year and the preceding 100 years.
+     */
     public function years()
     {
         return array_map(fn ($year) => Carbon::now()->subYears($year)->format('Y'), range(0, 100));
     }
 
+    /**
+     * Get the abbreviated name of each day of the week, starting from the configured start-of-week day.
+     */
     public function weekDays()
     {
         return array_map(fn ($day) => substr(Carbon::now()->startOfWeek()->addDays($day)->format('l'), 0, 2), range(0, 6));
     }
 
+    /**
+     * Get every day to display in the grid, padded to full weeks before and after the target month.
+     *
+     * @return array<int, array{date: Carbon, currentMonth: bool}>
+     */
     public function days()
     {
-        // 1. First and last day of the month
         $firstDay = Carbon::create($this->year, $this->month, 1);
         $lastDay = $firstDay->copy()->endOfMonth();
 
-        // 2. Determine the first day to display (start of the first week)
         $start = $firstDay->copy()->startOfWeek();
-
-        // 3. Determine the last day to display (end of the last week)
         $end = $lastDay->copy()->endOfWeek();
 
-        // 4. Loop through each day
         $days = [];
         for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
             $days[] = [
                 'date' => $date->copy(),
-                'currentMonth' => $date->month === $this->date->month, // marks if it's in the target month
+                'currentMonth' => $date->month === $this->date->month,
             ];
         }
 

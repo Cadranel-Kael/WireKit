@@ -1,5 +1,8 @@
 const MIN_PANEL_SIZE = 80
 
+/**
+ * A row/column of panels whose shared separators can be dragged to resize the panels on either side.
+ */
 export class Resizable {
     private readonly _el: HTMLElement
     private readonly _horizontal: boolean

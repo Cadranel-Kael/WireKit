@@ -13,6 +13,9 @@ function readCookie(name: string): string | undefined {
         ?.split('=')[1]
 }
 
+/**
+ * A collapsible sidebar whose open/closed state persists across reloads in a per-id cookie.
+ */
 export class Sidebar {
     private _isExpanded: boolean
 

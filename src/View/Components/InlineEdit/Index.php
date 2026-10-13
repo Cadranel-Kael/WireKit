@@ -5,14 +5,13 @@ namespace WireKit\View\Components\InlineEdit;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-/*
+/**
  * Click-to-rename text: shows the value as static content until triggered
  * (by clicking the display, or an external element with
  * data-wire-inline-edit-trigger="{id}"), then swaps in a text input. Enter
  * or blur commits and dispatches an "inline-edit:save" event (detail:
  * { value }); Escape cancels.
  */
-
 class Index extends Component
 {
     public string $id;

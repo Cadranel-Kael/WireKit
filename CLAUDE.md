@@ -119,3 +119,29 @@ If `Index` delegates rendering to a separate primitive sub-component (e.g. `<wir
 - `src/Traits/WithModal.php`, `WithToasts.php` — meant to be used *by a consuming app's own Livewire components*,
   not by anything in this package.
 - `src/Support/` currently has no files — an intentionally-reserved namespace, not a dead/stale directory.
+
+## Code comments
+
+Write comments the way the Laravel/Symfony core codebases do: document *what* and *why*, never narrate *how*.
+
+### Do
+
+- Add a short docblock on public classes, methods and functions describing their purpose in one sentence (e.g. "
+  Determine if the given key exists in the cache.").
+- Use `@param`, `@return`, `@throws` only when they add type info the signature can't express (generics, array shapes,
+  union nuances), e.g. `@return Collection<int, User>`.
+- Add an inline comment only when the code can't explain itself: a non-obvious business rule, a workaround (link the
+  issue), a performance trade-off, or a deliberate deviation from the expected approach.
+- Use `// TODO:` / `// FIXME:` with context when leaving known gaps.
+
+### Don't
+
+- Don't comment what the code literally does (`// Loop through users`, `// Return the result`, `// Check if null`).
+- Don't add step-by-step comments inside method bodies.
+- Don't write comments addressed to me (`// Here we...`, `// Now we need to...`, `// This ensures that...`).
+- Don't reference the current task or conversation (`// Added for the new feature`, `// Changed from X to Y`). That
+  belongs in the commit message.
+- Don't add docblocks that only repeat the method name or typed signature.
+- Don't add comments to code you didn't otherwise change.
+
+If a block feels like it needs an explanatory comment, prefer a better name or extracting a well-named method instead.

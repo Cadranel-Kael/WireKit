@@ -1,3 +1,7 @@
+/**
+ * A native <dialog>-backed modal: opens via showModal()/close(), and dispatches
+ * modal:before-open/open/before-close/close events around its native open/close transitions.
+ */
 export class Modal {
     private _triggers: NodeListOf<HTMLButtonElement>;
     private _closeButtons: NodeListOf<HTMLButtonElement>;

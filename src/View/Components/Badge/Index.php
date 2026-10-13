@@ -5,6 +5,9 @@ namespace WireKit\View\Components\Badge;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
+/**
+ * A small label, optionally with a status dot or icon.
+ */
 class Index extends Component
 {
     public string $colorClass;
@@ -28,6 +31,9 @@ class Index extends Component
         $this->dotColorClass = getColorClass($this->color, 'solid');
     }
 
+    /**
+     * Determine the shape class for the badge's variant.
+     */
     public function variantClass(): string
     {
         return match ($this->variant) {
@@ -36,6 +42,9 @@ class Index extends Component
         };
     }
 
+    /**
+     * Determine the text size and padding classes for the badge's size and variant.
+     */
     public function sizeClass(): string
     {
         return match ($this->size) {

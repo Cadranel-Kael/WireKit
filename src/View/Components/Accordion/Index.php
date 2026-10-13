@@ -5,10 +5,9 @@ namespace WireKit\View\Components\Accordion;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
-/*
- * An accordion component
+/**
+ * A single collapsible accordion item.
  */
-
 class Index extends Component
 {
     public $id;

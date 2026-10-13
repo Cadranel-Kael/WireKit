@@ -7,7 +7,6 @@ import { TreeItem } from './TreeItem'
  * plus a keyboard-only "move mode" (Space to grab, arrows to relocate,
  * Enter/Space to drop, Escape to cancel) as an accessible alternative to
  * pointer drag-and-drop for sortable/nested trees.
- * @class
  */
 export class Tree {
     private readonly _el: HTMLElement
@@ -27,10 +26,6 @@ export class Tree {
     private _originalNextSibling: HTMLElement | null = null
     private _liveRegion: HTMLElement | undefined
 
-    /**
-     * Create a tree.
-     * @param el
-     */
     constructor(el: HTMLElement) {
         this._el = el
         this._sortable = this._el.hasAttribute('data-wire-sortable')

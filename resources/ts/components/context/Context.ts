@@ -11,10 +11,6 @@ export class Context implements MenuController {
     private _currentX: number = 0;
     private _currentY: number = 0;
 
-    /**
-     * Constructor
-     * @param el
-     */
     constructor(private el: HTMLElement) {
         this.initializeItems();
         this.attachEventListeners();

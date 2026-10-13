@@ -1,5 +1,8 @@
 import { Tab } from './Tab'
 
+/**
+ * A group of tabs, exactly one of which is shown at a time.
+ */
 export class TabGroup {
     private _tabs: Array<Tab>
     private readonly _id: string
@@ -29,8 +32,6 @@ export class TabGroup {
                 trigger.setAttribute('aria-selected', 'true')
                 trigger.dataset.state = 'active'
                 trigger.tabIndex = 0
-
-                // if (focus) trigger.focus()
             } else {
                 if (panel) {
                     panel.style.display = 'none'

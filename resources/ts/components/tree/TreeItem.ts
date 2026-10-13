@@ -10,7 +10,6 @@ function findChild(el: Element, selector: string): HTMLElement | null {
 /**
  * A single node within a tree. Manages its own expanded/collapsed state
  * and the visibility of its nested group of children, if it has any.
- * @class
  */
 export class TreeItem {
     private readonly _el: HTMLElement
@@ -21,10 +20,6 @@ export class TreeItem {
     private _isExpanded: boolean
     private _listeners: Array<(item: TreeItem) => void> = []
 
-    /**
-     * Create a tree item.
-     * @param el
-     */
     constructor(el: HTMLElement) {
         this._el = el
         this._row = findChild(el, '[data-wire-tree-row]') as HTMLElement
