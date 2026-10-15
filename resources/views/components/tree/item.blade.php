@@ -8,7 +8,7 @@
     role="treeitem"
     data-wire-tree-item
     data-wire-expanded="@js($expanded)"
-    id="{{ $id }}"
+    id="{{ $resolveId($attributes->get('wire:key')) }}"
     @if ($hasChildren)
         aria-expanded="@js($expanded)"
     @endif

@@ -4,24 +4,36 @@ use WireKit\View\Components\Tree\Index;
 
 describe('Tree\Index', function () {
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
-            $tree = new Index();
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $tree = new Index(id: 'files');
 
-            expect($tree->id)->toBeString()->not->toBeEmpty();
+            expect($tree->resolveId())->toBe('files');
         });
 
-        it('prefixes the id with tree-', function () {
+        it('falls back to the element wire:key so morphs keep the id stable', function () {
             $tree = new Index();
 
-            expect($tree->id)->toStartWith('tree-');
+            expect($tree->resolveId('files'))->toBe('files');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $tree = new Index(id: 'explicit');
+
+            expect($tree->resolveId('files'))->toBe('explicit');
+        });
+
+        it('falls back to a generated tree- id without an explicit id or wire:key', function () {
+            $tree = new Index();
+
+            expect($tree->resolveId())->toStartWith('tree-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 
