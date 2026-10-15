@@ -2,7 +2,7 @@
     role="tree"
     data-wire-tree
     data-wire-tree-variant="{{ $variant }}"
-    id="{{ $id }}"
+    id="{{ $resolveId($attributes->get('wire:key')) }}"
     @if ($sortable)
         data-wire-sortable
     @endif

@@ -53,8 +53,11 @@ document.addEventListener('livewire:navigated', () => {
 // interactivity is native (popover, <dialog>) and keeps working
 // regardless of which DOM node currently carries their markup, so a
 // plain Livewire AJAX morph (wire:click, etc.) that adds a matching
-// element mid-session doesn't need any JS to run again. Two components
-// are exceptions. InlineEdit needs its own constructor to run on
+// element mid-session doesn't need any JS to run again. Modal falls in
+// this bucket too: its triggers and close buttons are wired through a
+// delegated document-level click listener (see Modal.ts), so a
+// morph-added trigger works without re-running init. Two components are
+// exceptions. InlineEdit needs its own constructor to run on
 // whatever element currently has the data-wire-inline-edit attribute,
 // including one that first appears well after initial load (e.g. a
 // conditional `@if/@else` block toggling a whole subtree in and out).

@@ -3,16 +3,7 @@
  * modal:before-open/open/before-close/close events around its native open/close transitions.
  */
 export class Modal {
-    private _triggers: NodeListOf<HTMLButtonElement>;
-    private _closeButtons: NodeListOf<HTMLButtonElement>;
-
     constructor(private _el: HTMLDialogElement) {
-        this._triggers = document.querySelectorAll(
-            `[data-wire-modal-trigger="${this._el.id}"]`,
-        ) as NodeListOf<HTMLButtonElement>;
-        this._closeButtons = document.querySelectorAll(
-            `[data-wire-modal-close="${this._el.id}"]`,
-        ) as NodeListOf<HTMLButtonElement>;
         this.attachTargetListeners();
         this._modalAttrObserver.observe(this._el, { attributes: true });
         this._modalRemoveObserver.observe(document.body, { attributes: false, subtree: false, childList: true });
@@ -44,10 +35,7 @@ export class Modal {
         mutations.forEach(async (mutation) => {
             mutation.removedNodes.forEach((removedNode) => {
                 if (removedNode === this._el) {
-                    removedNode.removeEventListener('click', this._lightDismiss);
-                    removedNode.removeEventListener('close', this._close);
-                    this._modalAttrObserver.disconnect();
-                    this._modalRemoveObserver.disconnect();
+                    this.destroy();
                     removedNode.dispatchEvent(new CustomEvent('modal:remove'));
                 }
             });
@@ -77,30 +65,41 @@ export class Modal {
     private attachTargetListeners() {
         this._el.addEventListener('click', this._lightDismiss);
         this._el.addEventListener('close', this._close);
-
-        this._triggers.forEach((trigger: HTMLButtonElement) => {
-            trigger.addEventListener('click', () => this._el.showModal());
-        });
-
-        this._closeButtons.forEach((trigger: HTMLButtonElement) => {
-            trigger.addEventListener('click', () => this._el.close());
-        });
+        document.addEventListener('click', this.handleDocumentClick);
         Livewire.on('modal:close-all', () => {
             this._el.close();
         });
     }
 
+    /**
+     * Triggers and close buttons are wired through one delegated document
+     * listener rather than per-element listeners: a Livewire morph can add
+     * or replace a trigger at any time, and a node that first appears after
+     * construction would otherwise stay dead. The <dialog> itself needs no
+     * such treatment -- showModal()/close() work on whatever node currently
+     * carries its markup.
+     */
+    private handleDocumentClick = (e: MouseEvent) => {
+        if (!this._el.isConnected) return;
+
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+
+        if (target.closest(`[data-wire-modal-trigger="${this._el.id}"]`)) {
+            this._el.showModal();
+            return;
+        }
+
+        if (target.closest(`[data-wire-modal-close="${this._el.id}"]`)) {
+            this._el.close();
+        }
+    };
+
     destroy() {
+        document.removeEventListener('click', this.handleDocumentClick);
         this._el.removeEventListener('click', this._lightDismiss);
         this._el.removeEventListener('close', this._close);
         this._modalAttrObserver.disconnect();
         this._modalRemoveObserver.disconnect();
-
-        this._triggers.forEach((trigger) => {
-            trigger.replaceWith(trigger.cloneNode(true)); // removes listeners
-        });
-        this._closeButtons.forEach((button) => {
-            button.replaceWith(button.cloneNode(true));
-        });
     }
 }

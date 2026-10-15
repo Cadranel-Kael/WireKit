@@ -62,24 +62,36 @@ describe('Tree\Item', function () {
         });
     });
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
-            $item = new Item();
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $item = new Item(id: 'src');
 
-            expect($item->id)->toBeString()->not->toBeEmpty();
+            expect($item->resolveId())->toBe('src');
         });
 
-        it('prefixes the id with tree-item-', function () {
+        it('falls back to the element wire:key so morphs keep the id stable', function () {
             $item = new Item();
 
-            expect($item->id)->toStartWith('tree-item-');
+            expect($item->resolveId('item-1'))->toBe('item-1');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $item = new Item(id: 'explicit');
+
+            expect($item->resolveId('item-1'))->toBe('explicit');
+        });
+
+        it('falls back to a generated tree-item- id without an explicit id or wire:key', function () {
+            $item = new Item();
+
+            expect($item->resolveId())->toStartWith('tree-item-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Item();
             $b = new Item();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 
