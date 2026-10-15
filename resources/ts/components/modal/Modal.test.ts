@@ -71,6 +71,30 @@ describe('Modal', () => {
 
             expect(el.hasAttribute('open')).toBe(false)
         })
+
+        it('opens the dialog when a trigger is added after construction', () => {
+            const el = makeModalEl('confirm-delete')
+            new Modal(el)
+
+            // A Livewire morph can drop a new trigger into the page at any
+            // time; it must work without re-running init.
+            const trigger = makeTrigger('confirm-delete')
+            trigger.click()
+
+            expect(el.hasAttribute('open')).toBe(true)
+        })
+
+        it('opens the dialog when the click lands on a child of the trigger', () => {
+            const el = makeModalEl('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
+            const icon = document.createElement('span')
+            trigger.appendChild(icon)
+            new Modal(el)
+
+            icon.click()
+
+            expect(el.hasAttribute('open')).toBe(true)
+        })
     })
 
     describe('close buttons', () => {
@@ -80,6 +104,17 @@ describe('Modal', () => {
             new Modal(el)
             el.showModal()
 
+            closeBtn.click()
+
+            expect(el.hasAttribute('open')).toBe(false)
+        })
+
+        it('closes the dialog when a close button is added after construction', () => {
+            const el = makeModalEl('confirm-delete')
+            new Modal(el)
+            el.showModal()
+
+            const closeBtn = makeCloseButton('confirm-delete')
             closeBtn.click()
 
             expect(el.hasAttribute('open')).toBe(false)
@@ -122,31 +157,41 @@ describe('Modal', () => {
         })
     })
 
+    describe('dialog removal', () => {
+        it('stops reacting to trigger clicks once the dialog is removed from the DOM', async () => {
+            const el = makeModalEl('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
+            new Modal(el)
+
+            el.remove()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            trigger.click()
+
+            expect(el.hasAttribute('open')).toBe(false)
+        })
+    })
+
     describe('destroy()', () => {
         it('stops reacting to trigger clicks after being destroyed', () => {
-            // destroy() strips listeners via the cloneNode+replaceWith trick, which swaps in a
-            // new element — so we must re-query the live (post-destroy) node, not the original
-            // reference, to observe what a real click in the page would do.
             const el = makeModalEl('confirm-delete')
-            makeTrigger('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
             const modal = new Modal(el)
 
             modal.destroy()
-            const liveTrigger = document.querySelector<HTMLButtonElement>('[data-wire-modal-trigger="confirm-delete"]')!
-            liveTrigger.click()
+            trigger.click()
 
             expect(el.hasAttribute('open')).toBe(false)
         })
 
         it('stops reacting to close button clicks after being destroyed', () => {
             const el = makeModalEl('confirm-delete')
-            makeCloseButton('confirm-delete')
+            const closeBtn = makeCloseButton('confirm-delete')
             const modal = new Modal(el)
             el.showModal()
 
             modal.destroy()
-            const liveCloseBtn = document.querySelector<HTMLButtonElement>('[data-wire-modal-close="confirm-delete"]')!
-            liveCloseBtn.click()
+            closeBtn.click()
 
             expect(el.hasAttribute('open')).toBe(true)
         })
