@@ -53,21 +53,24 @@ document.addEventListener('livewire:navigated', () => {
 // interactivity is native (popover, <dialog>) and keeps working
 // regardless of which DOM node currently carries their markup, so a
 // plain Livewire AJAX morph (wire:click, etc.) that adds a matching
-// element mid-session doesn't need any JS to run again. Modal falls in
-// this bucket too: its triggers and close buttons are wired through a
+// element mid-session doesn't need any JS to run again. Three components
+// are exceptions. Modal's triggers and close buttons are wired through a
 // delegated document-level click listener (see Modal.ts), so a
-// morph-added trigger works without re-running init. Two components are
-// exceptions. InlineEdit needs its own constructor to run on
-// whatever element currently has the data-wire-inline-edit attribute,
-// including one that first appears well after initial load (e.g. a
-// conditional `@if/@else` block toggling a whole subtree in and out).
-// Tree needs the same treatment for a different reason: a sortable tree
-// is rendered `wire:ignore` so SortableJS's own DOM mutations (and
+// morph-added trigger works without re-running init -- but the <dialog>
+// itself only gets its Modal instance from initModals(), so a morph that
+// adds or replaces the dialog (a conditional subtree, or a whole-subtree
+// swap caused by a per-render random id, see #5) leaves the fresh node
+// dead until initModals runs on it. InlineEdit needs its own constructor
+// to run on whatever element currently has the data-wire-inline-edit
+// attribute, including one that first appears well after initial load
+// (e.g. a conditional `@if/@else` block toggling a whole subtree in and
+// out). Tree needs the same treatment for a different reason: a sortable
+// tree is rendered `wire:ignore` so SortableJS's own DOM mutations (and
 // keyboard move-mode) never get clobbered by a Livewire re-render --
 // which also means Livewire can't morph new items into it. The
 // supported way to change a sortable tree's membership is to replace
 // the whole node (give it a `wire:key` that changes), which fires
-// `morph.added` for it. `morph.added` fires for exactly both cases.
+// `morph.added` for it. `morph.added` fires for exactly these cases.
 //
 // A non-wire:ignore tree *can* be morphed into, though -- Livewire adds
 // and removes `<li data-wire-tree-item>` elements as the underlying data
@@ -80,6 +83,7 @@ document.addEventListener('livewire:navigated', () => {
 // events in one tick produce one rescan, not N.
 document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.added', ({ el }: { el: HTMLElement }) => {
+        initModals(el)
         initInlineEdit(el)
         const created = initTrees(el)
 

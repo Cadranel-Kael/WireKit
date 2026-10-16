@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\Tooltip\Index;
 
-describe('Tooltip\Index', function () {
+describe('Tooltip\\Index', function () {
 
     describe('defaults', function () {
         it('has an empty content by default', function () {
@@ -36,26 +36,44 @@ describe('Tooltip\Index', function () {
             expect($tooltip->offset)->toBe('8');
             expect($tooltip->placement)->toBe('top');
         });
+
+        it('accepts an explicit id', function () {
+            $tooltip = new Index(id: 'copy-tooltip');
+
+            expect($tooltip->id)->toBe('copy-tooltip');
+        });
     });
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
-            $tooltip = new Index();
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $tooltip = new Index(id: 'copy');
 
-            expect($tooltip->id)->toBeString()->not->toBeEmpty();
+            expect($tooltip->resolveId())->toBe('copy');
         });
 
-        it('prefixes the id with tooltip-', function () {
+        it('falls back to the wire:key prefixed with tooltip- so morphs keep the id stable', function () {
             $tooltip = new Index();
 
-            expect($tooltip->id)->toStartWith('tooltip-');
+            expect($tooltip->resolveId('copy'))->toBe('tooltip-copy');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $tooltip = new Index(id: 'explicit');
+
+            expect($tooltip->resolveId('copy'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with tooltip-', function () {
+            $tooltip = new Index();
+
+            expect($tooltip->resolveId())->toStartWith('tooltip-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 });

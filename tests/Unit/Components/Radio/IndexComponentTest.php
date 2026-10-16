@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\Radio\Index;
 
-describe('Radio\Index', function () {
+describe('Radio\\Index', function () {
 
     describe('defaults', function () {
         it('has an empty label by default', function () {
@@ -25,20 +25,44 @@ describe('Radio\Index', function () {
             expect($radio->label)->toBe('Yes');
             expect($radio->required)->toBeTrue();
         });
+
+        it('accepts an explicit id', function () {
+            $radio = new Index(id: 'agree');
+
+            expect($radio->id)->toBe('agree');
+        });
     });
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $radio = new Index(id: 'agree');
+
+            expect($radio->resolveId())->toBe('agree');
+        });
+
+        it('falls back to the wire:key prefixed with radio- so morphs keep the id stable', function () {
             $radio = new Index();
 
-            expect($radio->id)->not->toBeEmpty();
+            expect($radio->resolveId('agree'))->toBe('radio-agree');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $radio = new Index(id: 'explicit');
+
+            expect($radio->resolveId('agree'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with radio-', function () {
+            $radio = new Index();
+
+            expect($radio->resolveId())->toStartWith('radio-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 });

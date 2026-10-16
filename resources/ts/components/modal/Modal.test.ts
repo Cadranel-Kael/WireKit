@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Modal } from './Modal'
+import { Modal, MODAL_INSTANCE_KEY } from './Modal'
 
 /**
  * happy-dom does not implement HTMLElement.getAnimations(), which Modal's
@@ -14,16 +14,20 @@ function polyfillGetAnimations() {
 function makeLivewireStub() {
     const handlers = new Map<string, (...args: unknown[]) => void>()
     return {
-        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => handlers.set(event, cb)),
+        // Livewire.on() returns an unsubscribe function.
+        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
+            handlers.set(event, cb)
+            return () => handlers.delete(event)
+        }),
         dispatch: vi.fn(),
         trigger: (event: string, ...args: unknown[]) => handlers.get(event)?.(...args),
     }
 }
 
-function makeModalEl(name = 'confirm-delete'): HTMLDialogElement {
+function makeModalEl(name = 'confirm-delete', container: HTMLElement = document.body): HTMLDialogElement {
     const el = document.createElement('dialog')
     el.id = name
-    document.body.appendChild(el)
+    container.appendChild(el)
     return el
 }
 
@@ -93,6 +97,34 @@ describe('Modal', () => {
 
             icon.click()
 
+            expect(el.hasAttribute('open')).toBe(true)
+        })
+
+        it('does not call showModal() again when the dialog is already open', () => {
+            const el = makeModalEl('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
+            new Modal(el)
+            el.showModal()
+            const spy = vi.spyOn(el, 'showModal')
+
+            // A second showModal() on an open dialog throws InvalidStateError
+            // in browsers.
+            expect(() => trigger.click()).not.toThrow()
+            expect(spy).not.toHaveBeenCalled()
+            expect(el.hasAttribute('open')).toBe(true)
+        })
+
+        it('does not throw when a stale and a fresh instance share the same dialog', () => {
+            const el = makeModalEl('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
+            new Modal(el)
+            // A stale instance whose node was re-attached matches the same
+            // trigger id, so both delegated handlers fire on one click.
+            new Modal(el)
+            const spy = vi.spyOn(el, 'showModal')
+
+            expect(() => trigger.click()).not.toThrow()
+            expect(spy).toHaveBeenCalledTimes(1)
             expect(el.hasAttribute('open')).toBe(true)
         })
     })
@@ -170,6 +202,62 @@ describe('Modal', () => {
 
             expect(el.hasAttribute('open')).toBe(false)
         })
+
+        it('is destroyed when an ancestor deep in the page is removed', async () => {
+            const wrapper = document.createElement('div')
+            document.body.appendChild(wrapper)
+            const el = makeModalEl('confirm-delete', wrapper)
+            const trigger = makeTrigger('confirm-delete')
+            new Modal(el)
+
+            wrapper.remove()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // destroy() ran: the stored instance is gone, so the document
+            // click listener and modal:close-all subscription are dropped
+            // too (the click below stays dead via the isConnected guard
+            // either way -- the leak is what this assertion catches).
+            expect((el as unknown as Record<string, unknown>)[MODAL_INSTANCE_KEY]).toBeUndefined()
+
+            trigger.click()
+
+            expect(el.hasAttribute('open')).toBe(false)
+        })
+
+        it('is not destroyed when the dialog is moved to another parent', async () => {
+            const el = makeModalEl('confirm-delete')
+            const trigger = makeTrigger('confirm-delete')
+            new Modal(el)
+            const elsewhere = document.createElement('div')
+            document.body.appendChild(elsewhere)
+
+            // A move is a removal and an insertion in the same mutation batch.
+            elsewhere.appendChild(el)
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            trigger.click()
+
+            expect(el.hasAttribute('open')).toBe(true)
+        })
+    })
+
+    describe('instance storage', () => {
+        it('stores the instance on the dialog element so init can find it', () => {
+            const el = makeModalEl('confirm-delete')
+
+            const modal = new Modal(el)
+
+            expect((el as unknown as Record<string, Modal>)[MODAL_INSTANCE_KEY]).toBe(modal)
+        })
+
+        it('clears the stored instance on destroy()', () => {
+            const el = makeModalEl('confirm-delete')
+            const modal = new Modal(el)
+
+            modal.destroy()
+
+            expect((el as unknown as Record<string, Modal>)[MODAL_INSTANCE_KEY]).toBeUndefined()
+        })
     })
 
     describe('destroy()', () => {
@@ -203,6 +291,17 @@ describe('Modal', () => {
 
             modal.destroy()
             el.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+            expect(el.hasAttribute('open')).toBe(true)
+        })
+
+        it('unsubscribes from modal:close-all', () => {
+            const el = makeModalEl('confirm-delete')
+            const modal = new Modal(el)
+            el.showModal()
+
+            modal.destroy()
+            livewire.trigger('modal:close-all')
 
             expect(el.hasAttribute('open')).toBe(true)
         })

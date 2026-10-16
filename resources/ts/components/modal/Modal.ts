@@ -1,12 +1,23 @@
 /**
+ * Expando key under which a <dialog> stores its Modal instance. A JS expando
+ * (rather than a data- attribute) survives Livewire morphing the dialog's
+ * attributes in place, so initModals() can tell an already-initialized
+ * dialog from a fresh one -- including one a morph swapped in mid-session.
+ */
+export const MODAL_INSTANCE_KEY = 'wireKitModal'
+
+type ModalElement = HTMLDialogElement & { [MODAL_INSTANCE_KEY]?: Modal }
+
+/**
  * A native <dialog>-backed modal: opens via showModal()/close(), and dispatches
  * modal:before-open/open/before-close/close events around its native open/close transitions.
  */
 export class Modal {
     constructor(private _el: HTMLDialogElement) {
+        (this._el as ModalElement)[MODAL_INSTANCE_KEY] = this
         this.attachTargetListeners();
         this._modalAttrObserver.observe(this._el, { attributes: true });
-        this._modalRemoveObserver.observe(document.body, { attributes: false, subtree: false, childList: true });
+        this._modalRemoveObserver.observe(document.documentElement, { attributes: false, subtree: true, childList: true });
     }
 
     private _modalAttrObserver = new MutationObserver((mutations, observer) => {
@@ -31,18 +42,22 @@ export class Modal {
         });
     });
 
+    // Watches the whole document, not just body's direct children: a morph
+    // can drop a dialog from anywhere in the page -- nested inside a swapped
+    // subtree, or with the <body> itself on wire:navigate -- and a stale
+    // instance would otherwise keep its document click listener and its
+    // modal:close-all subscription forever. The isConnected re-check ignores
+    // nodes that were merely moved within the same mutation batch.
     private _modalRemoveObserver = new MutationObserver((mutations, observer) => {
         mutations.forEach(async (mutation) => {
             mutation.removedNodes.forEach((removedNode) => {
-                if (removedNode === this._el) {
+                if (removedNode.contains(this._el) && !this._el.isConnected) {
                     this.destroy();
-                    removedNode.dispatchEvent(new CustomEvent('modal:remove'));
+                    this._el.dispatchEvent(new CustomEvent('modal:remove'));
                 }
             });
         });
     });
-
-    private _unsubscribeCloseAll: (() => void) | undefined;
 
     private _lightDismiss = ({ target: dialog }: { target: EventTarget | null }) => {
         if (dialog === this._el) {
@@ -64,14 +79,17 @@ export class Modal {
         await Promise.allSettled(this._el.getAnimations().map((a) => a.finished));
     }
 
+    private _closeAllOff: (() => void) | undefined;
+
     private attachTargetListeners() {
         this._el.addEventListener('click', this._lightDismiss);
         this._el.addEventListener('close', this._close);
         document.addEventListener('click', this.handleDocumentClick, true);
-        const unsubscribe: unknown = Livewire.on('modal:close-all', () => {
+        // Livewire.on() returns an unsubscribe function -- keep it so
+        // destroy() can drop the subscription.
+        this._closeAllOff = Livewire.on('modal:close-all', () => {
             this._el.close();
         });
-        if (typeof unsubscribe === 'function') this._unsubscribeCloseAll = unsubscribe as () => void;
     }
 
     /**
@@ -95,7 +113,10 @@ export class Modal {
         if (!(target instanceof Element)) return;
 
         if (target.closest(`[data-wire-modal-trigger="${this._el.id}"]`)) {
-            this._el.showModal();
+            // Guard against double-handling: a stale instance whose node was
+            // re-attached matches the same trigger id, and a second
+            // showModal() on an already-open dialog throws InvalidStateError.
+            if (!this._el.open) this._el.showModal();
             return;
         }
 
@@ -106,10 +127,13 @@ export class Modal {
 
     destroy() {
         document.removeEventListener('click', this.handleDocumentClick, true);
-        this._unsubscribeCloseAll?.();
         this._el.removeEventListener('click', this._lightDismiss);
         this._el.removeEventListener('close', this._close);
+        this._closeAllOff?.();
         this._modalAttrObserver.disconnect();
         this._modalRemoveObserver.disconnect();
+        // Drop the stored instance so the element can be re-initialized if
+        // it ever lands back in the DOM.
+        delete (this._el as ModalElement)[MODAL_INSTANCE_KEY];
     }
 }
