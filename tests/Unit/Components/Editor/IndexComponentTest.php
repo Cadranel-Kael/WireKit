@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\Editor\Index;
 
-describe('Editor\Index', function () {
+describe('Editor\\Index', function () {
 
     describe('defaults', function () {
         it('has an empty toolbar by default', function () {
@@ -18,24 +18,36 @@ describe('Editor\Index', function () {
         });
     });
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
-            $editor = new Index();
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $editor = new Index(id: 'bio');
 
-            expect($editor->id)->toBeString()->not->toBeEmpty();
+            expect($editor->resolveId())->toBe('bio');
         });
 
-        it('prefixes the id with editor-', function () {
+        it('falls back to the wire:key prefixed with editor- so morphs keep the id stable', function () {
             $editor = new Index();
 
-            expect($editor->id)->toStartWith('editor-');
+            expect($editor->resolveId('bio'))->toBe('editor-bio');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $editor = new Index(id: 'explicit');
+
+            expect($editor->resolveId('bio'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with editor-', function () {
+            $editor = new Index();
+
+            expect($editor->resolveId())->toStartWith('editor-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 

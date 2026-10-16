@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\Accordion\Index;
 
-describe('Accordion\Index', function () {
+describe('Accordion\\Index', function () {
 
     describe('defaults', function () {
         it('has an empty heading by default', function () {
@@ -24,56 +24,65 @@ describe('Accordion\Index', function () {
         });
     });
 
-    describe('auto-generated ids', function () {
-        it('generates a unique item id', function () {
+    describe('resolveIds()', function () {
+        it('prefers explicit ids', function () {
+            $component = new Index(id: 'item', contentId: 'content', headingId: 'heading');
+
+            $ids = $component->resolveIds();
+
+            expect($ids['id'])->toBe('item');
+            expect($ids['contentId'])->toBe('content');
+            expect($ids['headingId'])->toBe('heading');
+        });
+
+        it('falls back to the wire:key with prefixed suffixes so morphs keep the ids stable', function () {
+            $component = new Index();
+
+            $ids = $component->resolveIds('section');
+
+            expect($ids['id'])->toBe('accordion-item-section');
+            expect($ids['contentId'])->toBe('content-section');
+            expect($ids['headingId'])->toBe('heading-section');
+        });
+
+        it('prefers explicit ids over the wire:key', function () {
+            $component = new Index(id: 'explicit');
+
+            $ids = $component->resolveIds('section');
+
+            expect($ids['id'])->toBe('explicit');
+            expect($ids['contentId'])->toBe('content-section');
+            expect($ids['headingId'])->toBe('heading-section');
+        });
+
+        it('prefixes the fallback ids', function () {
+            $component = new Index();
+
+            $ids = $component->resolveIds();
+
+            expect($ids['id'])->toStartWith('accordion-item-');
+            expect($ids['contentId'])->toStartWith('content-');
+            expect($ids['headingId'])->toStartWith('heading-');
+        });
+
+        it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->toBeString()->not->toBeEmpty();
-            expect($b->id)->toBeString()->not->toBeEmpty();
-            expect($a->id)->not->toBe($b->id);
-        });
+            $idsA = $a->resolveIds();
+            $idsB = $b->resolveIds();
 
-        it('prefixes the item id with accordion-item-', function () {
-            $component = new Index();
-
-            expect($component->id)->toStartWith('accordion-item-');
-        });
-
-        it('generates a unique content id', function () {
-            $a = new Index();
-            $b = new Index();
-
-            expect($a->contentId)->toBeString()->not->toBeEmpty();
-            expect($b->contentId)->toBeString()->not->toBeEmpty();
-            expect($a->contentId)->not->toBe($b->contentId);
-        });
-
-        it('prefixes the content id with content-', function () {
-            $component = new Index();
-
-            expect($component->contentId)->toStartWith('content-');
-        });
-
-        it('generates a unique heading id', function () {
-            $a = new Index();
-            $b = new Index();
-
-            expect($a->headingId)->toBeString()->not->toBeEmpty();
-            expect($b->headingId)->toBeString()->not->toBeEmpty();
-            expect($a->headingId)->not->toBe($b->headingId);
-        });
-
-        it('prefixes the heading id with heading-', function () {
-            $component = new Index();
-
-            expect($component->headingId)->toStartWith('heading-');
+            expect($idsA['id'])->not->toBe($idsB['id']);
+            expect($idsA['contentId'])->not->toBe($idsB['contentId']);
+            expect($idsA['headingId'])->not->toBe($idsB['headingId']);
         });
 
         it('generates distinct content and heading ids', function () {
             $component = new Index();
 
-            expect($component->contentId)->not->toBe($component->headingId);
+            $ids = $component->resolveIds();
+
+            expect($ids['contentId'])->not->toBe($ids['headingId']);
         });
     });
 

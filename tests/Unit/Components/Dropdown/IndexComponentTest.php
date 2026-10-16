@@ -2,20 +2,38 @@
 
 use WireKit\View\Components\Dropdown\Index;
 
-describe('Dropdown\Index', function () {
+describe('Dropdown\\Index', function () {
 
-    describe('auto-generated dropdown id', function () {
-        it('generates a non-empty dropdown id', function () {
-            $dropdown = new Index();
+    describe('resolveDropdownId()', function () {
+        it('prefers an explicit id', function () {
+            $dropdown = new Index(id: 'actions');
 
-            expect($dropdown->dropdownId)->toBeString()->not->toBeEmpty();
+            expect($dropdown->resolveDropdownId())->toBe('actions');
         });
 
-        it('generates unique dropdown ids across instances', function () {
+        it('falls back to the wire:key prefixed with dropdown- so morphs keep the id stable', function () {
+            $dropdown = new Index();
+
+            expect($dropdown->resolveDropdownId('actions'))->toBe('dropdown-actions');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $dropdown = new Index(id: 'explicit');
+
+            expect($dropdown->resolveDropdownId('actions'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with dropdown-', function () {
+            $dropdown = new Index();
+
+            expect($dropdown->resolveDropdownId())->toStartWith('dropdown-');
+        });
+
+        it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->dropdownId)->not->toBe($b->dropdownId);
+            expect($a->resolveDropdownId())->not->toBe($b->resolveDropdownId());
         });
     });
 });

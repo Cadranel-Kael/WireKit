@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\Accordion\Group;
 
-describe('Accordion\Group', function () {
+describe('Accordion\\Group', function () {
 
     describe('defaults', function () {
         it('is not exclusive by default', function () {
@@ -18,24 +18,36 @@ describe('Accordion\Group', function () {
         });
     });
 
-    describe('auto-generated group id', function () {
-        it('generates a non-empty group id', function () {
-            $group = new Group();
+    describe('resolveGroupId()', function () {
+        it('prefers an explicit id', function () {
+            $group = new Group(id: 'faq');
 
-            expect($group->groupId)->toBeString()->not->toBeEmpty();
+            expect($group->resolveGroupId())->toBe('faq');
         });
 
-        it('prefixes the group id with group-', function () {
+        it('falls back to the wire:key prefixed with group- so morphs keep the id stable', function () {
             $group = new Group();
 
-            expect($group->groupId)->toStartWith('group-');
+            expect($group->resolveGroupId('faq'))->toBe('group-faq');
         });
 
-        it('generates unique group ids across instances', function () {
+        it('prefers an explicit id over the wire:key', function () {
+            $group = new Group(id: 'explicit');
+
+            expect($group->resolveGroupId('faq'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with group-', function () {
+            $group = new Group();
+
+            expect($group->resolveGroupId())->toStartWith('group-');
+        });
+
+        it('generates unique ids across instances', function () {
             $a = new Group();
             $b = new Group();
 
-            expect($a->groupId)->not->toBe($b->groupId);
+            expect($a->resolveGroupId())->not->toBe($b->resolveGroupId());
         });
     });
 

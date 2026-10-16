@@ -1,6 +1,12 @@
 @aware(['labelId', 'descriptionId', 'isInGroup' => false])
-@php($labelId = $labelId ?: uniqid('label-'))
-@php($descriptionId = $descriptionId ?: uniqid('description-'))
+@php
+    $fieldKey = $attributes->get('wire:key')
+        ?: $attributes->wire('model')->value()
+        ?: $attributes->get('name')
+        ?: $attributes->get('id');
+@endphp
+@php($labelId = $labelId ?: ($fieldKey ? 'label-' . md5((string) $fieldKey . '-label') : uniqid('label-')))
+@php($descriptionId = $descriptionId ?: ($fieldKey ? 'description-' . md5((string) $fieldKey . '-description') : uniqid('description-')))
 
 @if ($label || $description)
     <wire:field :$labelId :$descriptionId>

@@ -1,6 +1,15 @@
 @aware(['labelId', 'descriptionId', 'isInGroup' => false])
-@php($labelId = $labelId ?: uniqid('label-'))
-@php($descriptionId = $descriptionId ?: uniqid('description-'))
+@php
+    // Checkboxes in a group share one wire:model and differ only by value,
+    // so the value must be part of the key to keep ids unique.
+    $wireModel = $attributes->wire('model')->value();
+    $fieldKey = $attributes->get('wire:key')
+        ?: ($wireModel ? $wireModel . ':' . $attributes->get('value', '') : null)
+        ?: $attributes->get('name')
+        ?: $attributes->get('id');
+@endphp
+@php($labelId = $labelId ?: ($fieldKey ? 'label-' . md5((string) $fieldKey . '-label') : uniqid('label-')))
+@php($descriptionId = $descriptionId ?: ($fieldKey ? 'description-' . md5((string) $fieldKey . '-description') : uniqid('description-')))
 @if ($label || $description)
     <wire:field :description:position="$descriptionPosition($attributes)" :$labelId :$descriptionId display="inline">
         <div @class([$attributes->get('class'), 'relative flex items-center'])>

@@ -3,7 +3,7 @@
 use Illuminate\View\ComponentAttributeBag;
 use WireKit\View\Components\Field\Index;
 
-describe('Field\Index', function () {
+describe('Field\\Index', function () {
 
     describe('defaults', function () {
         it('defaults to a block display', function () {
@@ -13,44 +13,52 @@ describe('Field\Index', function () {
         });
     });
 
-    describe('auto-generated ids', function () {
-        it('generates a non-empty labelId when none is given', function () {
-            $field = new Index();
+    describe('resolveIds()', function () {
+        it('prefers explicit ids', function () {
+            $field = new Index(labelId: 'my-label', descriptionId: 'my-description');
 
-            expect($field->labelId)->toBeString()->not->toBeEmpty();
+            $ids = $field->resolveIds();
+
+            expect($ids['labelId'])->toBe('my-label');
+            expect($ids['descriptionId'])->toBe('my-description');
         });
 
-        it('prefixes the generated labelId with label-', function () {
+        it('falls back to the wire:key with prefixed suffixes so morphs keep the ids stable', function () {
             $field = new Index();
 
-            expect($field->labelId)->toStartWith('label-');
+            $ids = $field->resolveIds('email');
+
+            expect($ids['labelId'])->toBe('label-email');
+            expect($ids['descriptionId'])->toBe('description-email');
         });
 
-        it('generates a non-empty descriptionId when none is given', function () {
-            $field = new Index();
+        it('prefers explicit ids over the wire:key', function () {
+            $field = new Index(labelId: 'explicit');
 
-            expect($field->descriptionId)->toBeString()->not->toBeEmpty();
+            $ids = $field->resolveIds('email');
+
+            expect($ids['labelId'])->toBe('explicit');
+            expect($ids['descriptionId'])->toBe('description-email');
         });
 
-        it('prefixes the generated descriptionId with description-', function () {
+        it('prefixes the fallback ids', function () {
             $field = new Index();
 
-            expect($field->descriptionId)->toStartWith('description-');
+            $ids = $field->resolveIds();
+
+            expect($ids['labelId'])->toStartWith('label-');
+            expect($ids['descriptionId'])->toStartWith('description-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->labelId)->not->toBe($b->labelId);
-            expect($a->descriptionId)->not->toBe($b->descriptionId);
-        });
+            $idsA = $a->resolveIds();
+            $idsB = $b->resolveIds();
 
-        it('uses the given labelId and descriptionId instead of generating them', function () {
-            $field = new Index(labelId: 'my-label', descriptionId: 'my-description');
-
-            expect($field->labelId)->toBe('my-label');
-            expect($field->descriptionId)->toBe('my-description');
+            expect($idsA['labelId'])->not->toBe($idsB['labelId']);
+            expect($idsA['descriptionId'])->not->toBe($idsB['descriptionId']);
         });
     });
 
