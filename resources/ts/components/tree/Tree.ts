@@ -25,6 +25,7 @@ export class Tree {
     private _originalParent: HTMLElement | undefined
     private _originalNextSibling: HTMLElement | null = null
     private _liveRegion: HTMLElement | undefined
+    private _refreshPending = false
 
     constructor(el: HTMLElement) {
         this._el = el
@@ -48,11 +49,22 @@ export class Tree {
     }
 
     /**
-     * Rescans the DOM for tree items and rebuilds the internal item list.
-     * Call after Livewire morphs items in or out of the tree.
+     * Rescans the DOM for tree items, rebuilds the internal item list,
+     * and re-creates Sortable instances. Deferred to a microtask and
+     * coalesced: a morph that adds or removes N elements inside the
+     * tree fires N hooks, but only one rebuild runs per tick.
      */
     refresh() {
-        this.refreshItems()
+        if (this._refreshPending) return
+        this._refreshPending = true
+        queueMicrotask(() => {
+            this._refreshPending = false
+            // The tree itself may have been removed while the refresh
+            // was pending (e.g. a morph that replaces the whole node).
+            if (!this._el.isConnected) return
+            this.refreshItems()
+            this.reinitializeSortable()
+        })
     }
 
     destroy() {
@@ -74,9 +86,13 @@ export class Tree {
     }
 
     private refreshItems() {
+        // Preserve the active item across the rebuild when its element
+        // is still in the tree -- a morph that only adds or removes
+        // siblings shouldn't yank keyboard focus back to the first item.
+        const activeEl = this._activeItem?.el
         this._items.forEach((item) => item.destroy())
-        this._activeItem = undefined
         this.initializeItems()
+        this._activeItem = activeEl ? this._items.find((i) => i.el === activeEl) : undefined
         this.syncTabIndex()
     }
 
@@ -87,6 +103,18 @@ export class Tree {
         ]
         this._hasHandle = this._el.querySelector('[data-wire-tree-handle]') !== null
         this._sortableInstances = lists.map((list) => this.makeSortable(list, this._hasHandle))
+    }
+
+    /**
+     * Destroys all Sortable instances and re-creates them from the
+     * current DOM. A morph may have added new [data-wire-tree-group]
+     * lists (which need Sortable) or removed groups (whose instances
+     * must be destroyed so they don't leak).
+     */
+    private reinitializeSortable() {
+        if (!this._sortable && !this._nested) return
+        this._sortableInstances.forEach((s) => s.destroy())
+        this.initializeSortable()
     }
 
     private makeSortable(list: HTMLElement, hasHandle: boolean): Sortable {

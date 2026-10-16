@@ -75,9 +75,9 @@ document.addEventListener('livewire:navigated', () => {
 // stale on both additions and removals unless something tells it to
 // rescan. `morph.added` covers additions; `morph.removing` covers
 // removals (it fires while the node is still attached, so
-// `el.closest('[data-wire-tree]')` still resolves). Both defer the
-// resync to a microtask: these hooks fire during `patchChildren`, when
-// the DOM may still be partially morphed.
+// `el.closest('[data-wire-tree]')` still resolves). Tree.refresh()
+// coalesces multiple calls into a single deferred rebuild, so N morph
+// events in one tick produce one rescan, not N.
 document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.added', ({ el }: { el: HTMLElement }) => {
         initInlineEdit(el)
@@ -85,14 +85,14 @@ document.addEventListener('livewire:init', () => {
 
         const treeEl = el.closest<HTMLElement>('[data-wire-tree]')
         if (treeEl) {
-            queueMicrotask(() => getTree(treeEl)?.refresh())
+            getTree(treeEl)?.refresh()
         }
     })
 
     Livewire.hook('morph.removing', ({ el }: { el: HTMLElement }) => {
         const treeEl = el.closest<HTMLElement>('[data-wire-tree]')
         if (treeEl) {
-            queueMicrotask(() => getTree(treeEl)?.refresh())
+            getTree(treeEl)?.refresh()
         }
     })
 })

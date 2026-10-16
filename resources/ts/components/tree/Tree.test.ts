@@ -335,7 +335,7 @@ describe('Tree', () => {
     })
 
     describe('refresh()', () => {
-        it('picks up items added to the DOM after construction', () => {
+        it('picks up items added to the DOM after construction', async () => {
             const root = makeTree(true)
             const tree = new Tree(root)
 
@@ -349,11 +349,12 @@ describe('Tree', () => {
             root.appendChild(newItem)
 
             tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
 
             expect(tree.items).toHaveLength(5)
         })
 
-        it('drops items removed from the DOM', () => {
+        it('drops items removed from the DOM', async () => {
             const root = makeTree(true)
             const tree = new Tree(root)
 
@@ -363,9 +364,105 @@ describe('Tree', () => {
             itemB.remove()
 
             tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
 
             expect(tree.items).toHaveLength(3)
             expect(tree.items.map((i) => i.el)).not.toContain(itemB)
+        })
+
+        it('coalesces multiple calls into a single rebuild', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+            const spy = vi.spyOn(tree as unknown as { refreshItems: () => void }, 'refreshItems')
+
+            tree.refresh()
+            tree.refresh()
+            tree.refresh()
+
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(spy).toHaveBeenCalledTimes(1)
+        })
+
+        it('preserves the active item across a refresh', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Focus A2's row (third row in DOM order: A, A1, A2, B)
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[2].focus()
+            expect(document.activeElement).toBe(rows[2])
+
+            // Add a sibling at the end -- a morph that shouldn't move focus
+            const newItem = document.createElement('li')
+            newItem.dataset.wireTreeItem = ''
+            const newRow = document.createElement('div')
+            newRow.dataset.wireTreeRow = ''
+            newItem.appendChild(newRow)
+            root.appendChild(newItem)
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(document.activeElement).toBe(rows[2])
+        })
+
+        it('resets the active item when its element is removed', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[2].focus()
+            expect(document.activeElement).toBe(rows[2])
+
+            // Remove the active item's element
+            rows[2].closest('[data-wire-tree-item]')?.remove()
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Focus should fall back to the first visible item
+            expect(document.activeElement).not.toBe(rows[2])
+        })
+
+        it('reinitializes Sortable instances after a refresh', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            // Root list + A's children group = 2 instances
+            expect(sortableInstances()).toHaveLength(2)
+
+            // Simulate a morph adding a new group under item B
+            const itemB = Array.from(root.children).find((c) =>
+                c.hasAttribute('data-wire-tree-item') && c.querySelector('span')?.textContent === 'B',
+            ) as HTMLElement
+            const newGroup = document.createElement('ul')
+            newGroup.dataset.wireTreeGroup = ''
+            itemB.appendChild(newGroup)
+
+            const oldInstances = [...sortableInstances()]
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Root + A's group + B's new group = 3 instances, all fresh
+            expect(sortableInstances()).toHaveLength(3)
+            expect(sortableInstances()[0]).not.toBe(oldInstances[0])
+        })
+
+        it('does nothing when the tree element has been removed', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+            const itemCount = tree.items.length
+
+            root.remove()
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Items list is untouched -- the refresh was skipped
+            expect(tree.items).toHaveLength(itemCount)
         })
     })
 
