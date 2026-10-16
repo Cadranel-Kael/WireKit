@@ -2,7 +2,7 @@
 
 use WireKit\View\Components\InlineEdit\Index;
 
-describe('InlineEdit\Index', function () {
+describe('InlineEdit\\Index', function () {
 
     describe('defaults', function () {
         it('has an empty value by default', function () {
@@ -33,24 +33,36 @@ describe('InlineEdit\Index', function () {
         });
     });
 
-    describe('auto-generated id', function () {
-        it('generates a non-empty id', function () {
-            $inlineEdit = new Index();
+    describe('resolveId()', function () {
+        it('prefers an explicit id', function () {
+            $inlineEdit = new Index(id: 'custom-id');
 
-            expect($inlineEdit->id)->toBeString()->not->toBeEmpty();
+            expect($inlineEdit->resolveId())->toBe('custom-id');
         });
 
-        it('prefixes the id with inline-edit-', function () {
+        it('falls back to the wire:key prefixed with inline-edit- so morphs keep the id stable', function () {
             $inlineEdit = new Index();
 
-            expect($inlineEdit->id)->toStartWith('inline-edit-');
+            expect($inlineEdit->resolveId('title'))->toBe('inline-edit-title');
+        });
+
+        it('prefers an explicit id over the wire:key', function () {
+            $inlineEdit = new Index(id: 'explicit');
+
+            expect($inlineEdit->resolveId('title'))->toBe('explicit');
+        });
+
+        it('prefixes the fallback id with inline-edit-', function () {
+            $inlineEdit = new Index();
+
+            expect($inlineEdit->resolveId())->toStartWith('inline-edit-');
         });
 
         it('generates unique ids across instances', function () {
             $a = new Index();
             $b = new Index();
 
-            expect($a->id)->not->toBe($b->id);
+            expect($a->resolveId())->not->toBe($b->resolveId());
         });
     });
 });
