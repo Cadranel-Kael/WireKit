@@ -1,9 +1,20 @@
 /**
+ * Expando key under which a <dialog> stores its Modal instance. A JS expando
+ * (rather than a data- attribute) survives Livewire morphing the dialog's
+ * attributes in place, so initModals() can tell an already-initialized
+ * dialog from a fresh one -- including one a morph swapped in mid-session.
+ */
+export const MODAL_INSTANCE_KEY = 'wireKitModal'
+
+type ModalElement = HTMLDialogElement & { [MODAL_INSTANCE_KEY]?: Modal }
+
+/**
  * A native <dialog>-backed modal: opens via showModal()/close(), and dispatches
  * modal:before-open/open/before-close/close events around its native open/close transitions.
  */
 export class Modal {
     constructor(private _el: HTMLDialogElement) {
+        (this._el as ModalElement)[MODAL_INSTANCE_KEY] = this
         this.attachTargetListeners();
         this._modalAttrObserver.observe(this._el, { attributes: true });
         this._modalRemoveObserver.observe(document.body, { attributes: false, subtree: false, childList: true });
@@ -101,5 +112,8 @@ export class Modal {
         this._el.removeEventListener('close', this._close);
         this._modalAttrObserver.disconnect();
         this._modalRemoveObserver.disconnect();
+        // Drop the stored instance so the element can be re-initialized if
+        // it ever lands back in the DOM.
+        delete (this._el as ModalElement)[MODAL_INSTANCE_KEY];
     }
 }

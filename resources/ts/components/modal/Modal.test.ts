@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { Modal } from './Modal'
+import { Modal, MODAL_INSTANCE_KEY } from './Modal'
 
 /**
  * happy-dom does not implement HTMLElement.getAnimations(), which Modal's
@@ -169,6 +169,25 @@ describe('Modal', () => {
             trigger.click()
 
             expect(el.hasAttribute('open')).toBe(false)
+        })
+    })
+
+    describe('instance storage', () => {
+        it('stores the instance on the dialog element so init can find it', () => {
+            const el = makeModalEl('confirm-delete')
+
+            const modal = new Modal(el)
+
+            expect((el as unknown as Record<string, Modal>)[MODAL_INSTANCE_KEY]).toBe(modal)
+        })
+
+        it('clears the stored instance on destroy()', () => {
+            const el = makeModalEl('confirm-delete')
+            const modal = new Modal(el)
+
+            modal.destroy()
+
+            expect((el as unknown as Record<string, Modal>)[MODAL_INSTANCE_KEY]).toBeUndefined()
         })
     })
 
