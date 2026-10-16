@@ -28,14 +28,16 @@ class Item extends Component
 
     /**
      * Resolve the DOM id for the rendered element. An explicit id wins, then
-     * the element's wire:key: Livewire's morph keys elements off their id, so
-     * rendering a fresh uniqid() on every request would make it swap the whole
-     * subtree -- dropping every listener the TreeItem JS bound to it -- on each
-     * update. A random id is the last resort, for trees that never morph.
+     * the element's wire:key (prefixed, so bare keys like "3" can't collide
+     * across two trees on the same page): Livewire's morph keys elements off
+     * their id, so rendering a fresh uniqid() on every request would make it
+     * swap the whole subtree -- dropping every listener the TreeItem JS bound
+     * to it -- on each update. A random id is the last resort, for trees that
+     * never morph.
      */
     public function resolveId(?string $wireKey = null): string
     {
-        return $this->id ?? $wireKey ?? 'tree-item-' . uniqid();
+        return $this->id ?? ($wireKey !== null ? 'tree-item-' . $wireKey : 'tree-item-' . uniqid());
     }
 
     /**

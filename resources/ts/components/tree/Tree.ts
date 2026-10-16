@@ -63,7 +63,13 @@ export class Tree {
             // was pending (e.g. a morph that replaces the whole node).
             if (!this._el.isConnected) return
             this.refreshItems()
-            this.reinitializeSortable()
+            // Destroying Sortable instances mid-drag cancels the drag --
+            // a wire:poll or unrelated child update during a drag must
+            // not tear them down. The next refresh after the drag ends
+            // picks up any groups the morph added.
+            if (!this._draggedEl && !this._movingItem) {
+                this.reinitializeSortable()
+            }
         })
     }
 
@@ -373,10 +379,15 @@ export class Tree {
     }
 
     private visibleItems(): TreeItem[] {
-        // Items whose element has been detached from the DOM (e.g. by a
-        // Livewire morph that removed them) are stale: focusing them is a
-        // no-op, so they must not participate in keyboard navigation.
-        return this._items.filter((item) => item.el.isConnected && this.isVisible(item))
+        // Items whose element is no longer inside this tree (removed by a
+        // Livewire morph, or moved elsewhere) are stale: focusing them is a
+        // no-op or lands on the wrong element, so they must not participate
+        // in keyboard navigation. contains() covers both "detached from the
+        // DOM" and "still connected but no longer a descendant" -- the latter
+        // matters when a morph.removing rescan runs before the element is
+        // actually detached (delayed removal), leaving a stale TreeItem that
+        // only drops out of the tree later.
+        return this._items.filter((item) => this._el.contains(item.el) && this.isVisible(item))
     }
 
     private isVisible(item: TreeItem): boolean {
@@ -699,8 +710,12 @@ export class Tree {
             .filter((el) => el.hasAttribute('data-wire-tree-item'))
             .map((el) => {
                 const group = Array.from(el.children).find((c) => c.hasAttribute('data-wire-tree-group'))
+                // The DOM id is prefixed (tree-item-{key}) to stay unique
+                // across trees; the raw wire:key rides in a data attribute
+                // so the server receives the unprefixed identifier.
+                const itemEl = el as HTMLElement
                 return {
-                    id: (el as HTMLElement).id,
+                    id: itemEl.dataset.wireTreeKey ?? itemEl.id,
                     children: group ? this.serializeList(group) : [],
                 }
             })

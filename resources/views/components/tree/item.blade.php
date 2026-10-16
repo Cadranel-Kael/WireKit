@@ -9,6 +9,9 @@
     data-wire-tree-item
     data-wire-expanded="@js($expanded)"
     id="{{ $resolveId($attributes->get('wire:key')) }}"
+    @if ($attributes->get('wire:key'))
+        data-wire-tree-key="{{ $attributes->get('wire:key') }}"
+    @endif
     @if ($hasChildren)
         aria-expanded="@js($expanded)"
     @endif

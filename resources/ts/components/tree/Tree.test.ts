@@ -499,5 +499,135 @@ describe('Tree', () => {
 
             expect(document.activeElement).toBe(rows[rows.length - 1])
         })
+
+        it('excludes items moved out of the tree but still connected to the DOM', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Move A1's element outside the tree -- still connected, but no
+            // longer a descendant. Simulates a delayed morph removal where
+            // the element lingers in the DOM after leaving the tree.
+            const itemA1 = tree.items[1]
+            const outside = document.createElement('div')
+            document.body.appendChild(outside)
+            outside.appendChild(itemA1.el)
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+
+            // Focus should skip A1 (now outside the tree) and land on A2
+            expect(document.activeElement?.textContent).toContain('A2')
+        })
+    })
+
+    describe('serialization', () => {
+        it('sends the raw wire:key from data-wire-tree-key, not the prefixed DOM id', () => {
+            const root = makeTree(true, { sortable: true })
+            new Tree(root)
+
+            // Simulate what the Blade template renders: prefixed DOM id +
+            // raw key in a data attribute
+            const items = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-item]'))
+            const keys = ['3', '4', '5', '6'] // A, A1, A2, B
+            items.forEach((el, i) => {
+                el.id = `tree-item-${keys[i]}`
+                el.dataset.wireTreeKey = keys[i]
+            })
+
+            let capturedOrder: { id: string; children: object[] }[] | undefined
+            root.addEventListener('wire:tree:reorder', (e: CustomEvent) => {
+                capturedOrder = (e.detail as { order: { id: string; children: object[] }[] }).order
+            })
+
+            // Trigger a reorder via keyboard move mode: grab A, move down, drop
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+
+            // After the move, B is first and A is second; ids are the raw keys
+            expect(capturedOrder?.map((o) => o.id)).toEqual(['6', '3'])
+            // A's children are nested under it
+            expect(capturedOrder?.[1].children.map((c: { id: string }) => c.id)).toEqual(['4', '5'])
+        })
+
+        it('falls back to the DOM id when no data-wire-tree-key is set', () => {
+            const root = makeTree(true, { sortable: true })
+            new Tree(root)
+
+            const items = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-item]'))
+            items.forEach((el, i) => {
+                el.id = `custom-id-${i}`
+            })
+
+            let capturedOrder: { id: string; children: object[] }[] | undefined
+            root.addEventListener('wire:tree:reorder', (e: CustomEvent) => {
+                capturedOrder = (e.detail as { order: { id: string; children: object[] }[] }).order
+            })
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+
+            expect(capturedOrder?.map((o) => o.id)).toEqual(['custom-id-3', 'custom-id-0'])
+        })
+    })
+
+    describe('refresh during a drag', () => {
+        it('does not reinitialize Sortable while a pointer drag is active', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            // Simulate an active drag
+            ;(tree as unknown as { _draggedEl: HTMLElement })._draggedEl =
+                root.querySelector('[data-wire-tree-item]') as HTMLElement
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).toBe(oldInstances[0])
+        })
+
+        it('does not reinitialize Sortable during keyboard move mode', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            // Enter move mode
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).toBe(oldInstances[0])
+        })
+
+        it('reinitializes Sortable on refresh when no drag is active', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // No drag: instances are rebuilt (different objects, same count)
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).not.toBe(oldInstances[0])
+        })
     })
 })

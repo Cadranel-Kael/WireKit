@@ -69,10 +69,16 @@ describe('Tree\Item', function () {
             expect($item->resolveId())->toBe('src');
         });
 
-        it('falls back to the element wire:key so morphs keep the id stable', function () {
+        it('prefixes the element wire:key so bare keys cannot collide across trees', function () {
             $item = new Item();
 
-            expect($item->resolveId('item-1'))->toBe('item-1');
+            expect($item->resolveId('item-1'))->toBe('tree-item-item-1');
+        });
+
+        it('prefixes a bare numeric wire:key to avoid duplicate DOM ids', function () {
+            $item = new Item();
+
+            expect($item->resolveId('3'))->toBe('tree-item-3');
         });
 
         it('prefers an explicit id over the wire:key', function () {

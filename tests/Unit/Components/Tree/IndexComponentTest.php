@@ -11,10 +11,16 @@ describe('Tree\Index', function () {
             expect($tree->resolveId())->toBe('files');
         });
 
-        it('falls back to the element wire:key so morphs keep the id stable', function () {
+        it('prefixes the element wire:key so bare keys cannot collide across trees', function () {
             $tree = new Index();
 
-            expect($tree->resolveId('files'))->toBe('files');
+            expect($tree->resolveId('files'))->toBe('tree-files');
+        });
+
+        it('prefixes a bare numeric wire:key to avoid duplicate DOM ids', function () {
+            $tree = new Index();
+
+            expect($tree->resolveId('3'))->toBe('tree-3');
         });
 
         it('prefers an explicit id over the wire:key', function () {
