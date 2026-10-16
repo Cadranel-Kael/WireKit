@@ -84,7 +84,7 @@ export class Modal {
     private attachTargetListeners() {
         this._el.addEventListener('click', this._lightDismiss);
         this._el.addEventListener('close', this._close);
-        document.addEventListener('click', this.handleDocumentClick);
+        document.addEventListener('click', this.handleDocumentClick, true);
         // Livewire.on() returns an unsubscribe function -- keep it so
         // destroy() can drop the subscription.
         this._closeAllOff = Livewire.on('modal:close-all', () => {
@@ -98,10 +98,16 @@ export class Modal {
      * or replace a trigger at any time, and a node that first appears after
      * construction would otherwise stay dead. The <dialog> itself needs no
      * such treatment -- showModal()/close() work on whatever node currently
-     * carries its markup.
+     * carries its markup. It listens in the capture phase so a trigger whose
+     * own handler calls stopPropagation() still works, and tears itself down
+     * once the dialog is gone (a wire:navigate body swap never fires the
+     * removal observer).
      */
     private handleDocumentClick = (e: MouseEvent) => {
-        if (!this._el.isConnected) return;
+        if (!this._el.isConnected) {
+            this.destroy();
+            return;
+        }
 
         const target = e.target;
         if (!(target instanceof Element)) return;
@@ -120,7 +126,7 @@ export class Modal {
     };
 
     destroy() {
-        document.removeEventListener('click', this.handleDocumentClick);
+        document.removeEventListener('click', this.handleDocumentClick, true);
         this._el.removeEventListener('click', this._lightDismiss);
         this._el.removeEventListener('close', this._close);
         this._closeAllOff?.();

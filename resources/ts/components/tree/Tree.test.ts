@@ -333,4 +333,301 @@ describe('Tree', () => {
             expect(items()[1]).toBe(itemB)
         })
     })
+
+    describe('refresh()', () => {
+        it('picks up items added to the DOM after construction', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            expect(tree.items).toHaveLength(4)
+
+            const newItem = document.createElement('li')
+            newItem.dataset.wireTreeItem = ''
+            const newRow = document.createElement('div')
+            newRow.dataset.wireTreeRow = ''
+            newItem.appendChild(newRow)
+            root.appendChild(newItem)
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(tree.items).toHaveLength(5)
+        })
+
+        it('drops items removed from the DOM', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            const itemB = Array.from(root.children).find((c) =>
+                c.hasAttribute('data-wire-tree-item') && c.querySelector('span')?.textContent === 'B',
+            ) as HTMLElement
+            itemB.remove()
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(tree.items).toHaveLength(3)
+            expect(tree.items.map((i) => i.el)).not.toContain(itemB)
+        })
+
+        it('coalesces multiple calls into a single rebuild', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+            const spy = vi.spyOn(tree as unknown as { refreshItems: () => void }, 'refreshItems')
+
+            tree.refresh()
+            tree.refresh()
+            tree.refresh()
+
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(spy).toHaveBeenCalledTimes(1)
+        })
+
+        it('preserves the active item across a refresh', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Focus A2's row (third row in DOM order: A, A1, A2, B)
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[2].focus()
+            expect(document.activeElement).toBe(rows[2])
+
+            // Add a sibling at the end -- a morph that shouldn't move focus
+            const newItem = document.createElement('li')
+            newItem.dataset.wireTreeItem = ''
+            const newRow = document.createElement('div')
+            newRow.dataset.wireTreeRow = ''
+            newItem.appendChild(newRow)
+            root.appendChild(newItem)
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(document.activeElement).toBe(rows[2])
+        })
+
+        it('resets the active item when its element is removed', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[2].focus()
+            expect(document.activeElement).toBe(rows[2])
+
+            // Remove the active item's element
+            rows[2].closest('[data-wire-tree-item]')?.remove()
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Focus should fall back to the first visible item
+            expect(document.activeElement).not.toBe(rows[2])
+        })
+
+        it('reinitializes Sortable instances after a refresh', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            // Root list + A's children group = 2 instances
+            expect(sortableInstances()).toHaveLength(2)
+
+            // Simulate a morph adding a new group under item B
+            const itemB = Array.from(root.children).find((c) =>
+                c.hasAttribute('data-wire-tree-item') && c.querySelector('span')?.textContent === 'B',
+            ) as HTMLElement
+            const newGroup = document.createElement('ul')
+            newGroup.dataset.wireTreeGroup = ''
+            itemB.appendChild(newGroup)
+
+            const oldInstances = [...sortableInstances()]
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Root + A's group + B's new group = 3 instances, all fresh
+            expect(sortableInstances()).toHaveLength(3)
+            expect(sortableInstances()[0]).not.toBe(oldInstances[0])
+        })
+
+        it('does nothing when the tree element has been removed', async () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+            const itemCount = tree.items.length
+
+            root.remove()
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // Items list is untouched -- the refresh was skipped
+            expect(tree.items).toHaveLength(itemCount)
+        })
+    })
+
+    describe('detached items (morph removals)', () => {
+        it('excludes items whose element is no longer connected from keyboard navigation', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Simulate a Livewire morph removing the middle item (A1) without
+            // calling refresh(): the TreeItem stays in _items but its <li> is
+            // detached. Keyboard nav must skip it.
+            const itemA1 = tree.items[1]
+            itemA1.el.remove()
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+
+            // Focus should land on A2's row (index 2 in the full DOM query),
+            // not on the detached A1 row.
+            expect(document.activeElement).toBe(rows[1])
+            expect(document.activeElement?.textContent).toContain('A2')
+        })
+
+        it('still includes connected items after a sibling is detached', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            tree.items[1].el.remove()
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+
+            expect(document.activeElement).toBe(rows[rows.length - 1])
+        })
+
+        it('excludes items moved out of the tree but still connected to the DOM', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Move A1's element outside the tree -- still connected, but no
+            // longer a descendant. Simulates a delayed morph removal where
+            // the element lingers in the DOM after leaving the tree.
+            const itemA1 = tree.items[1]
+            const outside = document.createElement('div')
+            document.body.appendChild(outside)
+            outside.appendChild(itemA1.el)
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+
+            // Focus should skip A1 (now outside the tree) and land on A2
+            expect(document.activeElement?.textContent).toContain('A2')
+        })
+    })
+
+    describe('serialization', () => {
+        it('sends the raw wire:key from data-wire-tree-key, not the prefixed DOM id', () => {
+            const root = makeTree(true, { sortable: true })
+            new Tree(root)
+
+            // Simulate what the Blade template renders: prefixed DOM id +
+            // raw key in a data attribute
+            const items = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-item]'))
+            const keys = ['3', '4', '5', '6'] // A, A1, A2, B
+            items.forEach((el, i) => {
+                el.id = `tree-item-${keys[i]}`
+                el.dataset.wireTreeKey = keys[i]
+            })
+
+            let capturedOrder: { id: string; children: object[] }[] | undefined
+            root.addEventListener('wire:tree:reorder', (e: CustomEvent) => {
+                capturedOrder = (e.detail as { order: { id: string; children: object[] }[] }).order
+            })
+
+            // Trigger a reorder via keyboard move mode: grab A, move down, drop
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+
+            // After the move, B is first and A is second; ids are the raw keys
+            expect(capturedOrder?.map((o) => o.id)).toEqual(['6', '3'])
+            // A's children are nested under it
+            expect(capturedOrder?.[1].children.map((c: { id: string }) => c.id)).toEqual(['4', '5'])
+        })
+
+        it('falls back to the DOM id when no data-wire-tree-key is set', () => {
+            const root = makeTree(true, { sortable: true })
+            new Tree(root)
+
+            const items = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-item]'))
+            items.forEach((el, i) => {
+                el.id = `custom-id-${i}`
+            })
+
+            let capturedOrder: { id: string; children: object[] }[] | undefined
+            root.addEventListener('wire:tree:reorder', (e: CustomEvent) => {
+                capturedOrder = (e.detail as { order: { id: string; children: object[] }[] }).order
+            })
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+
+            expect(capturedOrder?.map((o) => o.id)).toEqual(['custom-id-3', 'custom-id-0'])
+        })
+    })
+
+    describe('refresh during a drag', () => {
+        it('does not reinitialize Sortable while a pointer drag is active', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            // Simulate an active drag
+            ;(tree as unknown as { _draggedEl: HTMLElement })._draggedEl =
+                root.querySelector('[data-wire-tree-item]') as HTMLElement
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).toBe(oldInstances[0])
+        })
+
+        it('does not reinitialize Sortable during keyboard move mode', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            // Enter move mode
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).toBe(oldInstances[0])
+        })
+
+        it('reinitializes Sortable on refresh when no drag is active', async () => {
+            const root = makeTree(true, { sortable: true })
+            const tree = new Tree(root)
+
+            const sortableInstances = () => (tree as unknown as { _sortableInstances: unknown[] })._sortableInstances
+            const oldInstances = [...sortableInstances()]
+
+            tree.refresh()
+            await new Promise((resolve) => setTimeout(resolve, 0))
+
+            // No drag: instances are rebuilt (different objects, same count)
+            expect(sortableInstances()).toHaveLength(oldInstances.length)
+            expect(sortableInstances()[0]).not.toBe(oldInstances[0])
+        })
+    })
 })

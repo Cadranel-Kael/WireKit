@@ -25,6 +25,9 @@ export class Tree {
     private _originalParent: HTMLElement | undefined
     private _originalNextSibling: HTMLElement | null = null
     private _liveRegion: HTMLElement | undefined
+    private _refreshPending = false
+    private _destroyed = false
+    private _sortableStale = false
 
     constructor(el: HTMLElement) {
         this._el = el
@@ -47,7 +50,35 @@ export class Tree {
         return this._items
     }
 
+    /**
+     * Rescans the DOM for tree items, rebuilds the internal item list,
+     * and re-creates Sortable instances. Deferred to a microtask and
+     * coalesced: a morph that adds or removes N elements inside the
+     * tree fires N hooks, but only one rebuild runs per tick.
+     */
+    refresh() {
+        if (this._refreshPending) return
+        this._refreshPending = true
+        queueMicrotask(() => {
+            this._refreshPending = false
+            // The tree itself may have been removed while the refresh
+            // was pending (e.g. a morph that replaces the whole node).
+            if (this._destroyed || !this._el.isConnected) return
+            this.refreshItems()
+            // Destroying Sortable instances mid-drag cancels the drag --
+            // a wire:poll or unrelated child update during a drag must
+            // not tear them down; the pass is deferred until the drag or
+            // move ends (see flushStaleSortable).
+            if (!this._draggedEl && !this._movingItem) {
+                this.reinitializeSortable()
+            } else {
+                this._sortableStale = true
+            }
+        })
+    }
+
     destroy() {
+        this._destroyed = true
         this._el.removeEventListener('keydown', this.handleKeydown)
         this._el.removeEventListener('focusin', this.handleFocusIn)
         this._sortableInstances.forEach((s) => s.destroy())
@@ -66,9 +97,15 @@ export class Tree {
     }
 
     private refreshItems() {
+        // Preserve the active item across the rebuild when its element
+        // is still in the tree -- a morph that only adds or removes
+        // siblings shouldn't yank keyboard focus back to the first item.
+        const activeEl = this._activeItem?.el
+        const movingEl = this._movingItem?.el
         this._items.forEach((item) => item.destroy())
-        this._activeItem = undefined
         this.initializeItems()
+        this._activeItem = activeEl ? this._items.find((i) => i.el === activeEl) : undefined
+        this._movingItem = movingEl ? this._items.find((i) => i.el === movingEl) : undefined
         this.syncTabIndex()
     }
 
@@ -79,6 +116,27 @@ export class Tree {
         ]
         this._hasHandle = this._el.querySelector('[data-wire-tree-handle]') !== null
         this._sortableInstances = lists.map((list) => this.makeSortable(list, this._hasHandle))
+    }
+
+    /**
+     * Destroys all Sortable instances and re-creates them from the
+     * current DOM. A morph may have added new [data-wire-tree-group]
+     * lists (which need Sortable) or removed groups (whose instances
+     * must be destroyed so they don't leak).
+     */
+    private reinitializeSortable() {
+        this._sortableStale = false
+        if (!this._sortable && !this._nested) return
+        this._sortableInstances.forEach((s) => s.destroy())
+        this.initializeSortable()
+    }
+
+    /**
+     * Runs the Sortable rebuild a morph requested while a drag or keyboard
+     * move was in progress.
+     */
+    private flushStaleSortable() {
+        if (this._sortableStale) this.refresh()
     }
 
     private makeSortable(list: HTMLElement, hasHandle: boolean): Sortable {
@@ -154,6 +212,7 @@ export class Tree {
         Livewire.dispatch('wire:tree:reorder', { order: this.serializeOrder() })
 
         this.refreshItems()
+        this.flushStaleSortable()
     }
 
     /**
@@ -337,7 +396,15 @@ export class Tree {
     }
 
     private visibleItems(): TreeItem[] {
-        return this._items.filter((item) => this.isVisible(item))
+        // Items whose element is no longer inside this tree (removed by a
+        // Livewire morph, or moved elsewhere) are stale: focusing them is a
+        // no-op or lands on the wrong element, so they must not participate
+        // in keyboard navigation. contains() covers both "detached from the
+        // DOM" and "still connected but no longer a descendant" -- the latter
+        // matters when a morph.removing rescan runs before the element is
+        // actually detached (delayed removal), leaving a stale TreeItem that
+        // only drops out of the tree later.
+        return this._items.filter((item) => this._el.contains(item.el) && this.isVisible(item))
     }
 
     private isVisible(item: TreeItem): boolean {
@@ -597,6 +664,7 @@ export class Tree {
 
     private exitMoveMode() {
         this._movingItem = undefined
+        this.flushStaleSortable()
         this._originalParent = undefined
         this._originalNextSibling = null
         this._touchedGroups = new Set()
@@ -660,8 +728,12 @@ export class Tree {
             .filter((el) => el.hasAttribute('data-wire-tree-item'))
             .map((el) => {
                 const group = Array.from(el.children).find((c) => c.hasAttribute('data-wire-tree-group'))
+                // The DOM id is prefixed (tree-item-{key}) to stay unique
+                // across trees; the raw wire:key rides in a data attribute
+                // so the server receives the unprefixed identifier.
+                const itemEl = el as HTMLElement
                 return {
-                    id: (el as HTMLElement).id,
+                    id: itemEl.dataset.wireTreeKey ?? itemEl.id,
                     children: group ? this.serializeList(group) : [],
                 }
             })

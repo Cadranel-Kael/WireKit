@@ -12,6 +12,8 @@ class Index extends Component
 {
     public ?string $id;
 
+    public ?string $treeId;
+
     public function __construct(
         ?string       $id = null,
         public string $variant = 'file',
@@ -20,18 +22,21 @@ class Index extends Component
     )
     {
         $this->id = $id;
+        $this->treeId = $id;
     }
 
     /**
      * Resolve the DOM id for the rendered element. An explicit id wins, then
-     * the element's wire:key: Livewire's morph keys elements off their id, so
-     * rendering a fresh uniqid() on every request would make it swap the whole
-     * subtree -- dropping every listener the Tree JS bound inside it -- on each
-     * update. A random id is the last resort, for trees that never morph.
+     * the element's wire:key (prefixed, so bare keys like "3" can't collide
+     * across two trees on the same page): Livewire's morph keys elements off
+     * their id, so rendering a fresh uniqid() on every request would make it
+     * swap the whole subtree -- dropping every listener the Tree JS bound
+     * inside it -- on each update. A random id is the last resort, for trees
+     * that never morph.
      */
     public function resolveId(?string $wireKey = null): string
     {
-        return $this->id ?? $wireKey ?? 'tree-' . uniqid();
+        return $this->id ?? ($wireKey !== null ? 'tree-' . $wireKey : 'tree-' . uniqid());
     }
 
     /**
