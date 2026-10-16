@@ -26,6 +26,8 @@ export class Tree {
     private _originalNextSibling: HTMLElement | null = null
     private _liveRegion: HTMLElement | undefined
     private _refreshPending = false
+    private _destroyed = false
+    private _sortableStale = false
 
     constructor(el: HTMLElement) {
         this._el = el
@@ -61,19 +63,22 @@ export class Tree {
             this._refreshPending = false
             // The tree itself may have been removed while the refresh
             // was pending (e.g. a morph that replaces the whole node).
-            if (!this._el.isConnected) return
+            if (this._destroyed || !this._el.isConnected) return
             this.refreshItems()
             // Destroying Sortable instances mid-drag cancels the drag --
             // a wire:poll or unrelated child update during a drag must
-            // not tear them down. The next refresh after the drag ends
-            // picks up any groups the morph added.
+            // not tear them down; the pass is deferred until the drag or
+            // move ends (see flushStaleSortable).
             if (!this._draggedEl && !this._movingItem) {
                 this.reinitializeSortable()
+            } else {
+                this._sortableStale = true
             }
         })
     }
 
     destroy() {
+        this._destroyed = true
         this._el.removeEventListener('keydown', this.handleKeydown)
         this._el.removeEventListener('focusin', this.handleFocusIn)
         this._sortableInstances.forEach((s) => s.destroy())
@@ -96,9 +101,11 @@ export class Tree {
         // is still in the tree -- a morph that only adds or removes
         // siblings shouldn't yank keyboard focus back to the first item.
         const activeEl = this._activeItem?.el
+        const movingEl = this._movingItem?.el
         this._items.forEach((item) => item.destroy())
         this.initializeItems()
         this._activeItem = activeEl ? this._items.find((i) => i.el === activeEl) : undefined
+        this._movingItem = movingEl ? this._items.find((i) => i.el === movingEl) : undefined
         this.syncTabIndex()
     }
 
@@ -118,9 +125,18 @@ export class Tree {
      * must be destroyed so they don't leak).
      */
     private reinitializeSortable() {
+        this._sortableStale = false
         if (!this._sortable && !this._nested) return
         this._sortableInstances.forEach((s) => s.destroy())
         this.initializeSortable()
+    }
+
+    /**
+     * Runs the Sortable rebuild a morph requested while a drag or keyboard
+     * move was in progress.
+     */
+    private flushStaleSortable() {
+        if (this._sortableStale) this.refresh()
     }
 
     private makeSortable(list: HTMLElement, hasHandle: boolean): Sortable {
@@ -196,6 +212,7 @@ export class Tree {
         Livewire.dispatch('wire:tree:reorder', { order: this.serializeOrder() })
 
         this.refreshItems()
+        this.flushStaleSortable()
     }
 
     /**
@@ -647,6 +664,7 @@ export class Tree {
 
     private exitMoveMode() {
         this._movingItem = undefined
+        this.flushStaleSortable()
         this._originalParent = undefined
         this._originalNextSibling = null
         this._touchedGroups = new Set()

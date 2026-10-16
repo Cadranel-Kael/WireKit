@@ -87,6 +87,12 @@ describe('Tree\Item', function () {
             expect($item->resolveId('item-1'))->toBe('explicit');
         });
 
+        it('scopes the wire:key to the parent tree id so keys cannot collide across trees', function () {
+            $item = new Item();
+
+            expect($item->resolveId('3', 'files'))->toBe('files-item-3');
+        });
+
         it('falls back to a generated tree-item- id without an explicit id or wire:key', function () {
             $item = new Item();
 

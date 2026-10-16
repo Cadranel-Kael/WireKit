@@ -12,6 +12,8 @@ class Index extends Component
 {
     public ?string $id;
 
+    public ?string $treeId;
+
     public function __construct(
         ?string       $id = null,
         public string $variant = 'file',
@@ -20,6 +22,7 @@ class Index extends Component
     )
     {
         $this->id = $id;
+        $this->treeId = $id;
     }
 
     /**

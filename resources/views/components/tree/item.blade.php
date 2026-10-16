@@ -1,4 +1,4 @@
-@aware(["variant", "sortable", "nested"])
+@aware(["variant", "sortable", "nested", "treeId"])
 @php
     $hasChildren = trim(preg_replace("/<!--\[if (END)?BLOCK\]><!\[endif\]-->/", "", (string) $slot)) !== "";
     $hasActions = isset($actions) && trim(preg_replace("/<!--\[if (END)?BLOCK\]><!\[endif\]-->/", "", (string) $actions)) !== "";
@@ -8,8 +8,8 @@
     role="treeitem"
     data-wire-tree-item
     data-wire-expanded="@js($expanded)"
-    id="{{ $resolveId($attributes->get('wire:key')) }}"
-    @if ($attributes->get('wire:key'))
+    id="{{ $resolveId($attributes->get('wire:key'), $treeId ?? null) }}"
+    @if ($attributes->get('wire:key') && ! $id)
         data-wire-tree-key="{{ $attributes->get('wire:key') }}"
     @endif
     @if ($hasChildren)

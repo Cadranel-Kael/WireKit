@@ -81,10 +81,10 @@ document.addEventListener('livewire:navigated', () => {
 document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.added', ({ el }: { el: HTMLElement }) => {
         initInlineEdit(el)
-        initTrees(el)
+        const created = initTrees(el)
 
         const treeEl = el.closest<HTMLElement>('[data-wire-tree]')
-        if (treeEl) {
+        if (treeEl && !created.some((tree) => tree.el === treeEl)) {
             getTree(treeEl)?.refresh()
         }
     })
