@@ -9,7 +9,11 @@ function polyfillGetAnimations() {
 function makeLivewireStub() {
     const handlers = new Map<string, (...args: unknown[]) => void>()
     return {
-        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => handlers.set(event, cb)),
+        // Livewire.on() returns an unsubscribe function.
+        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
+            handlers.set(event, cb)
+            return () => handlers.delete(event)
+        }),
         dispatch: vi.fn(),
         trigger: (event: string, ...args: unknown[]) => handlers.get(event)?.(...args),
     }
@@ -87,6 +91,16 @@ describe('initModals()', () => {
         initModals()
 
         expect(() => livewire.trigger('modal:show', { name: 'missing' })).not.toThrow()
+    })
+
+    it('does not throw when modal:show targets an already-open modal', () => {
+        const el = makeModalEl('confirm-delete')
+        initModals()
+        el.showModal()
+        const spy = vi.spyOn(el, 'showModal')
+
+        expect(() => livewire.trigger('modal:show', { name: 'confirm-delete' })).not.toThrow()
+        expect(spy).not.toHaveBeenCalled()
     })
 
     it('stores the Modal instance on the dialog element', () => {

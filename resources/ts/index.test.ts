@@ -15,7 +15,11 @@ function makeLivewireStub() {
     const handlers = new Map<string, (...args: unknown[]) => void>()
     const hooks = new Map<string, (payload: never) => void>()
     return {
-        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => handlers.set(event, cb)),
+        // Livewire.on() returns an unsubscribe function.
+        on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
+            handlers.set(event, cb)
+            return () => handlers.delete(event)
+        }),
         dispatch: vi.fn(),
         hook: vi.fn((name: string, cb: (payload: never) => void) => hooks.set(name, cb)),
         trigger: (event: string, ...args: unknown[]) => handlers.get(event)?.(...args),

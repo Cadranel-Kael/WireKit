@@ -24,7 +24,8 @@ function registerLivewireListeners() {
 
     Livewire.on('modal:show', ({ name }: { name: string }) => {
         const modal = document.getElementById(name) as HTMLDialogElement | null;
-        modal?.showModal();
+        // showModal() on an already-open dialog throws InvalidStateError.
+        if (modal && !modal.open) modal.showModal();
     });
 
     Livewire.on('modal:close', ({ name }: { name: string }) => {
