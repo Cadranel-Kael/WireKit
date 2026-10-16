@@ -10,7 +10,7 @@ import { removeLoading } from './helpers/removeLoading'
 import { initEditor } from './components/editor/initEditor'
 import initToasts from './components/toast/initToasts'
 import WireToast from './components/toast/WireToast'
-import { initTrees } from './components/tree/initTrees'
+import { getTree, initTrees } from './components/tree/initTrees'
 import { initResizables } from './components/resizable/initResizables'
 import { initInlineEdit } from './components/inline-edit/initInlineEdit'
 import { initSidebars } from './components/sidebar/initSidebars'
@@ -68,9 +68,31 @@ document.addEventListener('livewire:navigated', () => {
 // supported way to change a sortable tree's membership is to replace
 // the whole node (give it a `wire:key` that changes), which fires
 // `morph.added` for it. `morph.added` fires for exactly both cases.
+//
+// A non-wire:ignore tree *can* be morphed into, though -- Livewire adds
+// and removes `<li data-wire-tree-item>` elements as the underlying data
+// changes. The Tree instance keeps its own `_items` list, which goes
+// stale on both additions and removals unless something tells it to
+// rescan. `morph.added` covers additions; `morph.removing` covers
+// removals (it fires while the node is still attached, so
+// `el.closest('[data-wire-tree]')` still resolves). Both defer the
+// resync to a microtask: these hooks fire during `patchChildren`, when
+// the DOM may still be partially morphed.
 document.addEventListener('livewire:init', () => {
     Livewire.hook('morph.added', ({ el }: { el: HTMLElement }) => {
         initInlineEdit(el)
         initTrees(el)
+
+        const treeEl = el.closest<HTMLElement>('[data-wire-tree]')
+        if (treeEl) {
+            queueMicrotask(() => getTree(treeEl)?.refresh())
+        }
+    })
+
+    Livewire.hook('morph.removing', ({ el }: { el: HTMLElement }) => {
+        const treeEl = el.closest<HTMLElement>('[data-wire-tree]')
+        if (treeEl) {
+            queueMicrotask(() => getTree(treeEl)?.refresh())
+        }
     })
 })

@@ -333,4 +333,74 @@ describe('Tree', () => {
             expect(items()[1]).toBe(itemB)
         })
     })
+
+    describe('refresh()', () => {
+        it('picks up items added to the DOM after construction', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            expect(tree.items).toHaveLength(4)
+
+            const newItem = document.createElement('li')
+            newItem.dataset.wireTreeItem = ''
+            const newRow = document.createElement('div')
+            newRow.dataset.wireTreeRow = ''
+            newItem.appendChild(newRow)
+            root.appendChild(newItem)
+
+            tree.refresh()
+
+            expect(tree.items).toHaveLength(5)
+        })
+
+        it('drops items removed from the DOM', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            const itemB = Array.from(root.children).find((c) =>
+                c.hasAttribute('data-wire-tree-item') && c.querySelector('span')?.textContent === 'B',
+            ) as HTMLElement
+            itemB.remove()
+
+            tree.refresh()
+
+            expect(tree.items).toHaveLength(3)
+            expect(tree.items.map((i) => i.el)).not.toContain(itemB)
+        })
+    })
+
+    describe('detached items (morph removals)', () => {
+        it('excludes items whose element is no longer connected from keyboard navigation', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            // Simulate a Livewire morph removing the middle item (A1) without
+            // calling refresh(): the TreeItem stays in _items but its <li> is
+            // detached. Keyboard nav must skip it.
+            const itemA1 = tree.items[1]
+            itemA1.el.remove()
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+
+            // Focus should land on A2's row (index 2 in the full DOM query),
+            // not on the detached A1 row.
+            expect(document.activeElement).toBe(rows[1])
+            expect(document.activeElement?.textContent).toContain('A2')
+        })
+
+        it('still includes connected items after a sibling is detached', () => {
+            const root = makeTree(true)
+            const tree = new Tree(root)
+
+            tree.items[1].el.remove()
+
+            const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-wire-tree-row]'))
+            rows[0].focus()
+            rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+
+            expect(document.activeElement).toBe(rows[rows.length - 1])
+        })
+    })
 })

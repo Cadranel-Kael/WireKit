@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { Tree } from './Tree'
-import { initTrees } from './initTrees'
+import { getTree, initTrees } from './initTrees'
 
 function makeTreeEl(container: HTMLElement = document.body, id = 'tree'): HTMLElement {
     const el = document.createElement('ul')
@@ -63,5 +63,27 @@ describe('initTrees()', () => {
         const result = initTrees(el)
 
         expect(result).toHaveLength(1)
+    })
+})
+
+describe('getTree()', () => {
+    it('returns the Tree instance for an initialised tree element', () => {
+        const el = makeTreeEl()
+        const [tree] = initTrees()
+
+        expect(getTree(el)).toBe(tree)
+    })
+
+    it('returns undefined for an element that has no initialised tree', () => {
+        const el = makeTreeEl()
+
+        expect(getTree(el)).toBeUndefined()
+    })
+
+    it('returns undefined for an element that is not a tree', () => {
+        const el = document.createElement('div')
+        document.body.appendChild(el)
+
+        expect(getTree(el)).toBeUndefined()
     })
 })

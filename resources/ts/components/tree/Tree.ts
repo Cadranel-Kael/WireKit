@@ -47,6 +47,14 @@ export class Tree {
         return this._items
     }
 
+    /**
+     * Rescans the DOM for tree items and rebuilds the internal item list.
+     * Call after Livewire morphs items in or out of the tree.
+     */
+    refresh() {
+        this.refreshItems()
+    }
+
     destroy() {
         this._el.removeEventListener('keydown', this.handleKeydown)
         this._el.removeEventListener('focusin', this.handleFocusIn)
@@ -337,7 +345,10 @@ export class Tree {
     }
 
     private visibleItems(): TreeItem[] {
-        return this._items.filter((item) => this.isVisible(item))
+        // Items whose element has been detached from the DOM (e.g. by a
+        // Livewire morph that removed them) are stale: focusing them is a
+        // no-op, so they must not participate in keyboard navigation.
+        return this._items.filter((item) => item.el.isConnected && this.isVisible(item))
     }
 
     private isVisible(item: TreeItem): boolean {
