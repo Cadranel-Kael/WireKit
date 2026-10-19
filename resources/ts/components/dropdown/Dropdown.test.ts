@@ -9,7 +9,7 @@ vi.mock('@floating-ui/dom', () => ({
 }))
 
 function dispatchToggle(el: HTMLElement, newState: 'open' | 'closed'): void {
-    const event = new Event('toggle') as Event & { newState?: string }
+    const event = new Event('toggle', { bubbles: true }) as Event & { newState?: string }
     event.newState = newState
     el.dispatchEvent(event)
 }
@@ -151,18 +151,26 @@ describe('Dropdown', () => {
     })
 
     describe('positioning', () => {
-        it('computes and applies position when a popover target opens', async () => {
-            const { computePosition } = await import('@floating-ui/dom')
-            const { el } = makeDropdownEl(0)
+        function makeDropdownWithMenu(menuId: string): { el: HTMLElement; trigger: HTMLElement; target: HTMLElement } {
+            const el = document.createElement('div')
+            el.dataset.wireDropdown = ''
 
             const trigger = document.createElement('button')
-            trigger.setAttribute('popovertarget', 'menu-1')
+            trigger.setAttribute('popovertarget', menuId)
             el.appendChild(trigger)
 
             const target = document.createElement('div')
-            target.id = 'menu-1'
+            target.id = menuId
+            el.appendChild(target)
+
+            document.body.appendChild(el)
+            return { el, trigger, target }
+        }
+
+        it('computes and applies position when a popover target opens', async () => {
+            const { computePosition } = await import('@floating-ui/dom')
+            const { el, trigger, target } = makeDropdownWithMenu('menu-1')
             target.dataset.wirePlacement = 'bottom-end'
-            document.body.appendChild(target)
 
             new Dropdown(el)
             dispatchToggle(target, 'open')
@@ -180,15 +188,7 @@ describe('Dropdown', () => {
 
         it('defaults to bottom-start when no placement is set', async () => {
             const { computePosition } = await import('@floating-ui/dom')
-            const { el } = makeDropdownEl(0)
-
-            const trigger = document.createElement('button')
-            trigger.setAttribute('popovertarget', 'menu-2')
-            el.appendChild(trigger)
-
-            const target = document.createElement('div')
-            target.id = 'menu-2'
-            document.body.appendChild(target)
+            const { el, trigger, target } = makeDropdownWithMenu('menu-2')
 
             new Dropdown(el)
             dispatchToggle(target, 'open')
@@ -204,15 +204,7 @@ describe('Dropdown', () => {
         it('does nothing when the popover closes', async () => {
             const { computePosition } = await import('@floating-ui/dom')
             vi.mocked(computePosition).mockClear()
-            const { el } = makeDropdownEl(0)
-
-            const trigger = document.createElement('button')
-            trigger.setAttribute('popovertarget', 'menu-3')
-            el.appendChild(trigger)
-
-            const target = document.createElement('div')
-            target.id = 'menu-3'
-            document.body.appendChild(target)
+            const { el, target } = makeDropdownWithMenu('menu-3')
 
             new Dropdown(el)
             dispatchToggle(target, 'closed')
@@ -221,18 +213,51 @@ describe('Dropdown', () => {
             expect(computePosition).not.toHaveBeenCalled()
         })
 
+        it('positions a fresh menu after the old one is swapped out by a morph', async () => {
+            // Regression test for #11: when the dropdown has no explicit
+            // id/wire:key, Livewire's morph swaps the trigger and menu
+            // elements (their ids change every render). The Dropdown
+            // instance lives on the stable root, and the delegated toggle
+            // listener must catch the fresh menu's toggle event and
+            // position it using the fresh trigger.
+            const { computePosition } = await import('@floating-ui/dom')
+            vi.mocked(computePosition).mockClear()
+            const { el, trigger, target } = makeDropdownWithMenu('menu-old')
+
+            new Dropdown(el)
+
+            // Simulate a Livewire morph: both trigger and menu get new ids
+            // and the old elements are replaced with fresh ones.
+            const oldTrigger = trigger
+            const oldTarget = target
+            oldTrigger.remove()
+            oldTarget.remove()
+
+            const newTrigger = document.createElement('button')
+            newTrigger.setAttribute('popovertarget', 'menu-new')
+            el.appendChild(newTrigger)
+
+            const newTarget = document.createElement('div')
+            newTarget.id = 'menu-new'
+            el.appendChild(newTarget)
+
+            dispatchToggle(newTarget, 'open')
+            await Promise.resolve()
+            await Promise.resolve()
+
+            expect(computePosition).toHaveBeenCalledWith(
+                newTrigger,
+                newTarget,
+                expect.objectContaining({ strategy: 'fixed' }),
+            )
+            expect(newTarget.style.left).toBe('12px')
+            expect(newTarget.style.top).toBe('34px')
+        })
+
         it('stops repositioning after destroy()', async () => {
             const { computePosition } = await import('@floating-ui/dom')
             vi.mocked(computePosition).mockClear()
-            const { el } = makeDropdownEl(0)
-
-            const trigger = document.createElement('button')
-            trigger.setAttribute('popovertarget', 'menu-4')
-            el.appendChild(trigger)
-
-            const target = document.createElement('div')
-            target.id = 'menu-4'
-            document.body.appendChild(target)
+            const { el, target } = makeDropdownWithMenu('menu-4')
 
             const dropdown = new Dropdown(el)
             dropdown.destroy()

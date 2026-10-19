@@ -2,13 +2,17 @@ import { computePosition, flip, offset, shift, type Placement } from '@floating-
 
 export class Dropdown {
     private _items: HTMLElement[] = []
-    private _toggleTargets: HTMLElement[] = []
 
     constructor(private _el: HTMLElement) {
         this._el.addEventListener('mouseover', this._handleMouseOver)
         this._el.addEventListener('keydown', this._handleKeydown)
+        // The popover `toggle` event bubbles, so a single delegated listener
+        // on the root catches toggles from any menu inside it -- including
+        // a fresh menu element after a Livewire morph swaps the old one out
+        // (which happens when the dropdown has no explicit id/wire:key, so
+        // the per-render uniqid() changes the menu's DOM id each render).
+        this._el.addEventListener('toggle', this._handlePopoverToggle)
         this._refreshItems()
-        this._attachPositioning()
     }
 
     private _refreshItems(): void {
@@ -17,23 +21,14 @@ export class Dropdown {
         )
     }
 
-    private _attachPositioning(): void {
-        this._el.querySelectorAll<HTMLElement>('[popovertarget]').forEach((trigger) => {
-            const targetId = trigger.getAttribute('popovertarget')
-            const target = targetId ? document.getElementById(targetId) : null
-
-            if (!target || this._toggleTargets.includes(target)) return
-
-            this._toggleTargets.push(target)
-            target.addEventListener('toggle', this._handlePopoverToggle)
-        })
-    }
-
     private _handlePopoverToggle = (e: Event): void => {
         const target = e.target
         if (!(target instanceof HTMLElement)) return
         if ((e as Event & { newState?: string }).newState !== 'open') return
 
+        // Look up the trigger fresh from the DOM -- after a morph the old
+        // trigger element is detached and a new one (with a new id) is in
+        // its place, so we can't cache the reference.
         const trigger = this._el.querySelector<HTMLElement>(`[popovertarget="${target.id}"]`)
         if (!trigger) return
 
@@ -94,7 +89,6 @@ export class Dropdown {
     public destroy(): void {
         this._el.removeEventListener('mouseover', this._handleMouseOver)
         this._el.removeEventListener('keydown', this._handleKeydown)
-        this._toggleTargets.forEach((target) => target.removeEventListener('toggle', this._handlePopoverToggle))
-        this._toggleTargets = []
+        this._el.removeEventListener('toggle', this._handlePopoverToggle)
     }
 }
