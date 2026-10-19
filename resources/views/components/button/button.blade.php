@@ -1,13 +1,13 @@
-@aware(["dropdownId"])
+@aware(["resolveDropdownId"])
 <button
     data-wire-button
     data-wire-field
     @if ($loading)
         wire:loading.class="opacity-50"
     @endif
-    @if ($dropdownId)
-        id="trigger-{{ $dropdownId }}"
-        popovertarget="menu-{{ $dropdownId }}"
+    @if ($resolveDropdownId)
+        id="trigger-{{ $resolveDropdownId() }}"
+        popovertarget="menu-{{ $resolveDropdownId() }}"
         popovertargetaction="toggle"
     @endif
     {{

@@ -1,12 +1,12 @@
-@aware(["dropdownId"])
+@aware(["resolveDropdownId"])
 @php
-    $isPopoverMenu = ($dropdownId && ! $id) || $attributes->has('popover');
+    $isPopoverMenu = ($resolveDropdownId && ! $id) || $attributes->has('popover');
 @endphp
 <div
     data-wire-menu
     tabindex="-1"
-    @if ($dropdownId && ! $id)
-        id="menu-{{ $dropdownId }}"
+    @if ($resolveDropdownId && ! $id)
+        id="menu-{{ $resolveDropdownId() }}"
         popover
     @endif
     @if ($id)
