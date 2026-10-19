@@ -18,7 +18,7 @@
     {{
         $attributes->class([
             "border-border bg-background outline-none focus-visible:focus-ring rounded-lg border p-2 text-sm shadow-sm",
-            "fixed inset-auto m-0" => $isPopoverMenu,
+            "fixed inset-auto m-0 [&:popover-open:not([data-wire-positioned])]:invisible" => $isPopoverMenu,
         ])
     }}
 >

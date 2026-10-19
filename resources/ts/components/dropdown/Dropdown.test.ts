@@ -5,11 +5,14 @@ vi.mock('@floating-ui/dom', () => ({
     computePosition: vi.fn(() => Promise.resolve({ x: 12, y: 34 })),
     flip: vi.fn(),
     offset: vi.fn(),
-    shift: vi.fn(),
+    autoUpdate: vi.fn((_reference: unknown, _floating: unknown, update: () => void) => {
+        update()
+        return vi.fn()
+    }),
 }))
 
 function dispatchToggle(el: HTMLElement, newState: 'open' | 'closed'): void {
-    const event = new Event('toggle', { bubbles: true }) as Event & { newState?: string }
+    const event = new Event('toggle', { bubbles: false }) as Event & { newState?: string }
     event.newState = newState
     el.dispatchEvent(event)
 }
@@ -186,6 +189,21 @@ describe('Dropdown', () => {
             expect(target.style.top).toBe('34px')
         })
 
+        it('marks the menu as positioned only while it is open', async () => {
+            const { el, target } = makeDropdownWithMenu('menu-7')
+
+            new Dropdown(el)
+            dispatchToggle(target, 'open')
+            await Promise.resolve()
+            await Promise.resolve()
+
+            expect(target.hasAttribute('data-wire-positioned')).toBe(true)
+
+            dispatchToggle(target, 'closed')
+
+            expect(target.hasAttribute('data-wire-positioned')).toBe(false)
+        })
+
         it('defaults to bottom-start when no placement is set', async () => {
             const { computePosition } = await import('@floating-ui/dom')
             const { el, trigger, target } = makeDropdownWithMenu('menu-2')
@@ -252,6 +270,36 @@ describe('Dropdown', () => {
             )
             expect(newTarget.style.left).toBe('12px')
             expect(newTarget.style.top).toBe('34px')
+        })
+
+        it('keeps the menu anchored to the trigger only while it is open', async () => {
+            const { autoUpdate } = await import('@floating-ui/dom')
+            const stop = vi.fn()
+            vi.mocked(autoUpdate).mockReturnValueOnce(stop)
+            const { el, trigger, target } = makeDropdownWithMenu('menu-5')
+
+            new Dropdown(el)
+            dispatchToggle(target, 'open')
+
+            expect(autoUpdate).toHaveBeenCalledWith(trigger, target, expect.any(Function))
+            expect(stop).not.toHaveBeenCalled()
+
+            dispatchToggle(target, 'closed')
+
+            expect(stop).toHaveBeenCalledTimes(1)
+        })
+
+        it('stops anchoring open menus on destroy()', async () => {
+            const { autoUpdate } = await import('@floating-ui/dom')
+            const stop = vi.fn()
+            vi.mocked(autoUpdate).mockReturnValueOnce(stop)
+            const { el, target } = makeDropdownWithMenu('menu-6')
+
+            const dropdown = new Dropdown(el)
+            dispatchToggle(target, 'open')
+            dropdown.destroy()
+
+            expect(stop).toHaveBeenCalledTimes(1)
         })
 
         it('stops repositioning after destroy()', async () => {
