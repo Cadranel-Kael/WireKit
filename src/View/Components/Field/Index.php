@@ -7,6 +7,9 @@ use Illuminate\View\View;
 
 class Index extends Component
 {
+    /** @var array{labelId: string, descriptionId: string}|null */
+    protected ?array $resolvedIds = null;
+
     public function __construct(
         public ?string $labelId = null,
         public ?string $descriptionId = null,
@@ -23,16 +26,22 @@ class Index extends Component
      * on each update. Random ids are the last resort, for fields that never
      * morph.
      *
+     * Memoized so the ids stay stable across the render lifecycle.
+     *
      * @return array{labelId: string, descriptionId: string}
      */
     public function resolveIds(?string $wireKey = null): array
     {
-        $suffix = $wireKey ? '-' . $wireKey : '-' . uniqid();
+        if ($this->resolvedIds === null) {
+            $suffix = $wireKey ? '-' . $wireKey : '-' . uniqid();
 
-        return [
-            'labelId' => $this->labelId ?: 'label' . $suffix,
-            'descriptionId' => $this->descriptionId ?: 'description' . $suffix,
-        ];
+            $this->resolvedIds = [
+                'labelId' => $this->labelId ?: 'label' . $suffix,
+                'descriptionId' => $this->descriptionId ?: 'description' . $suffix,
+            ];
+        }
+
+        return $this->resolvedIds;
     }
 
     public function descriptionPosition($attributes): string
@@ -40,13 +49,28 @@ class Index extends Component
         return $attributes->get('description:position', '');
     }
 
-    public function render(): View
+    /**
+     * Resolve the ids once the tag's attributes arrive. Blade applies them
+     * via withAttributes() after render() -- where $this->attributes is still
+     * null -- but before the view renders, so this is the first point the
+     * wire:key is readable.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function withAttributes(array $attributes): static
     {
+        parent::withAttributes($attributes);
+
         [
             'labelId' => $this->labelId,
             'descriptionId' => $this->descriptionId,
         ] = $this->resolveIds($this->attributes->get('wire:key'));
 
+        return $this;
+    }
+
+    public function render(): View
+    {
         return view('wire-kit::components.field.index');
     }
 }
