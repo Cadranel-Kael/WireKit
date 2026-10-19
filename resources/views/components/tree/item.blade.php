@@ -67,12 +67,9 @@
             </a>
 
             @if ($hasActions)
-                <wire:dropdown class="ml-auto shrink-0">
-                    <wire:button variant="ghost" size="xs" inset icon="ellipsis" :tooltip="__('Actions')" />
-                    <wire:menu>
-                        {{ $actions }}
-                    </wire:menu>
-                </wire:dropdown>
+                <div data-wire-tree-actions class="ml-auto flex shrink-0 items-center gap-1">
+                    {{ $actions }}
+                </div>
             @endif
         </div>
     @else
@@ -129,12 +126,9 @@
             @endif
 
             @if ($hasActions)
-                <wire:dropdown class="ml-auto shrink-0">
-                    <wire:button variant="ghost" size="xs" inset icon="ellipsis" :tooltip="__('Actions')" />
-                    <wire:menu>
-                        {{ $actions }}
-                    </wire:menu>
-                </wire:dropdown>
+                <div data-wire-tree-actions class="ml-auto flex shrink-0 items-center gap-1">
+                    {{ $actions }}
+                </div>
             @endif
         </div>
     @endif
