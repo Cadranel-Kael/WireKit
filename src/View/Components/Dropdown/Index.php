@@ -24,16 +24,38 @@ class Index extends Component
      * elements off their id, so a fresh uniqid() on every render would swap
      * the trigger/menu elements on each update. A random id is the last
      * resort, for dropdowns that never morph.
+     *
+     * Memoized so the trigger and menu -- which each resolve the id through
+     * @aware -- render the same id.
      */
     public function resolveDropdownId(?string $wireKey = null): string
     {
-        return $this->id ?? ($wireKey ? 'dropdown-' . $wireKey : 'dropdown-' . uniqid());
+        if ($this->dropdownId === '') {
+            $this->dropdownId = $this->id ?? ($wireKey ? 'dropdown-' . $wireKey : 'dropdown-' . uniqid());
+        }
+
+        return $this->dropdownId;
+    }
+
+    /**
+     * Resolve the dropdown id once the tag's attributes arrive. Blade applies
+     * them via withAttributes() after render() -- where $this->attributes is
+     * still null -- but before any nested trigger/menu view renders, so this
+     * is the first point the wire:key is readable.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function withAttributes(array $attributes): static
+    {
+        parent::withAttributes($attributes);
+
+        $this->resolveDropdownId($this->attributes->get('wire:key'));
+
+        return $this;
     }
 
     public function render(): View
     {
-        $this->dropdownId = $this->resolveDropdownId($this->attributes->get('wire:key'));
-
         return view('wire-kit::components.dropdown.index');
     }
 }
